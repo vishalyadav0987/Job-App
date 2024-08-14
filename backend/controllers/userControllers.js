@@ -1,3 +1,4 @@
+const generateAndSetToken = require("../generateAndSetToken/generateAndSetToken");
 const UserSchema = require("../models/UserSchema");
 const bcryptjs = require('bcryptjs');
 
@@ -37,7 +38,7 @@ const register = async (req, res) => {
             success: true,
             message: "User Succesfully registered.",
             data: {
-                ...newUser,
+                ...newUser._doc,
                 password: undefined,
             }
         })
@@ -51,8 +52,58 @@ const register = async (req, res) => {
 }
 
 const login = async (req, res) => {
+    const { email, password, role } = req.body;
+    try {
+        if (!email || !password || !role) {
+            return res.json({
+                success: false,
+                message: "All fields are required!"
+            });
+        }
 
+        const userExsits = await UserSchema.findOne({ email });
+        if (!userExsits) {
+            return res.json({
+                success: false,
+                message: "Invalid crendential!",
+            });
+        }
+
+        const isMatch = await bcryptjs.compare(password, userExsits.password);
+        if (!isMatch) {
+            return res.json({
+                success: false,
+                message: "Invalid crendential!",
+            });
+        }
+
+        if (role !== userExsits.role) {
+            return res.json({
+                success: false,
+                message: "Account doesn't exist with current role.",
+            });
+        }
+
+
+        generateAndSetToken(res, userExsits._id);
+
+        res.json({
+            success: true,
+            data: {
+                ...userExsits._doc,
+                password: undefined,
+            }
+        })
+
+    } catch (error) {
+        console.log("Error in login function -> ", error.message);
+        res.json({
+            success: false,
+            message: error.message,
+        });
+    }
 }
+
 const logout = async (req, res) => {
 
 }
