@@ -1,6 +1,7 @@
 const generateAndSetToken = require("../generateAndSetToken/generateAndSetToken");
 const UserSchema = require("../models/UserSchema");
 const bcryptjs = require('bcryptjs');
+const cloudinary = require('cloudinary').v2;
 
 
 // REGISTER - BOTH --- USER and RECRUTER
@@ -118,9 +119,68 @@ const logout = async (req, res) => {
 
 }
 
+// UPDATE PROFILE
+const updateProfile = async (req, res) => {
+    const { fullname, email, phoneNumber, bio, skills } = req.body;
+    // let { resume } = req.body;
+    // const originNameResume = resume;
+    try {
+        const userId = req.user;
+        console.log(userId)
+        if (!fullname || !email || !bio || !phoneNumber || !skills) {
+            return res.json({
+                success: false,
+                message: "All fields are required!"
+            });
+        }
+
+        const skillsArray = skills.split(",")
+        const user = await UserSchema.findById(userId);
+        if (!user) {
+            return res.json({
+                success: false,
+                message: "User not found!",
+            });
+        }
+
+        user.fullname = fullname;
+        user.email = email;
+        user.phoneNumber = phoneNumber;
+        user.profile.bio = bio;
+        user.profile.skills = skillsArray;
+
+        // if (resume) {
+        //     const uploadResume = await cloudinary.uploader.upload(resume);
+        //     resume = uploadResume.secure_url;
+        // }
+
+        // user.profile.resume = resume;
+        // user.profile.resumeOriginalName = `${originNameResume}` // Save the original file name
+
+        await user.save();
+
+        res.json({
+            success: true,
+            message: "User succesfully updated",
+            data: {
+                ...user._doc,
+                password: undefined,
+            }
+        });
+
+    } catch (error) {
+        console.log("Error in updateProfile function -> ", error.message);
+        res.json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
 
 module.exports = {
     register,
     login,
     logout,
+    updateProfile,
 }
