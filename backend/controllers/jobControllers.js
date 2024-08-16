@@ -15,15 +15,6 @@ const postJob = async (req, res) => {
             comapanyId
         } = req.body;
         const userId = req.user;
-        console.log(title,
-            description,
-            requirements,
-            salary,
-            location,
-            jobType,
-            position,
-            experience,
-            comapanyId);
 
         if (!title || !description || !requirements || !salary || !location || !jobType || !position || !experience || !comapanyId) {
             return res.json({
@@ -63,7 +54,6 @@ const postJob = async (req, res) => {
 
 
 // GET ALL JOB FOR STUDENTS
-
 const getAllJobs = async (req, res) => {
     try {
         const keyword = req.query.keyword || "";
@@ -75,7 +65,7 @@ const getAllJobs = async (req, res) => {
         }
 
         const jobs = await JobSchema.find(query).populate({
-            path: "company",
+            path: "comapanyId",
         }).sort({ createdAt: -1 })
 
         if (!jobs) {
@@ -98,7 +88,37 @@ const getAllJobs = async (req, res) => {
     }
 }
 
+
+// GET JOB FOR STUDENTS
+const getJobById = async (req, res) => {
+    try {
+        const { id: jobId } = req.params;
+        const job = await JobSchema.findById(jobId).populate({
+            path: "applications"
+        });
+
+        if (!job) {
+            return res.json({
+                success: false,
+                message: `No found job with this id ${jobId}.`,
+            });
+        }
+
+        res.json({
+            success: true,
+            data: job,
+        })
+    } catch (error) {
+        console.log("Error in getJobById function -> ", error.message);
+        res.json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
 module.exports = {
     postJob,
-    getAllJobs
+    getAllJobs,
+    getJobById
 }
