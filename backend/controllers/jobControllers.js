@@ -117,8 +117,41 @@ const getJobById = async (req, res) => {
     }
 }
 
+//GET ALL JOBS OF ADMIN CREATED (LOGIN RECRUTER)
+const getAllJobsOfAdmin = async (req, res) => {
+    try {
+        // Login recruiter id
+        const userId = req.user;
+        const jobs = await JobSchema.find({
+            created_By: userId
+        }).populate({
+            path: 'comapanyId',
+            createdAt: -1
+        });
+
+        if (!jobs) {
+            return res.json({
+                success: false,
+                message: "No found job with this owner.",
+            });
+        }
+
+        res.json({
+            success: true,
+            data: jobs,
+        })
+    } catch (error) {
+        console.log("Error in getAllJobsOfAdmin function -> ", error.message);
+        res.json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
 module.exports = {
     postJob,
     getAllJobs,
-    getJobById
+    getJobById,
+    getAllJobsOfAdmin
 }
