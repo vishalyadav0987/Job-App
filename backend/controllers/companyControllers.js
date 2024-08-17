@@ -1,5 +1,6 @@
 const CompanySchema = require('../models/CompanySchema');
-const UserSchema = require('../models/UserSchema')
+const UserSchema = require('../models/UserSchema');
+const cloudinary = require('cloudinary').v2;
 
 const registerCompany = async (req, res) => {
     const { name: companyName, location } = req.body;
@@ -64,8 +65,8 @@ const registerCompany = async (req, res) => {
 const updateCompany = async (req, res) => {
     try {
         const { name, description, website, location } = req.body;
+        let { logoImg } = req.body;
         const userId = req.user;
-        console.log(userId)
 
         // Check if the user is authorized
         const checkUserRole = await UserSchema.findById(userId);
@@ -89,8 +90,14 @@ const updateCompany = async (req, res) => {
             });
         }
 
+        // cloudinary
+        if (logoImg) {
+            const uploadLogo = await cloudinary.uploader.upload(logoImg);
+            logoImg = uploadLogo.secure_url;
+        }
+
         // Update company details
-        const updateData = { name, description, website, location };
+        const updateData = { name, description, website, location, logoImg };
         const company = await CompanySchema.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
         if (!company) {
