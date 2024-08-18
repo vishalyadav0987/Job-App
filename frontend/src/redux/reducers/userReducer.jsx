@@ -1,5 +1,8 @@
 import {
     CLEAR_ERRORS,
+    LOAD_USER_FAIL,
+    LOAD_USER_REQUEST,
+    LOAD_USER_SUCEESS,
     LOGIN_FAIL,
     LOGIN_REQUEST,
     LOGIN_SUCEESS,
@@ -12,12 +15,14 @@ const userReducer = (state = { user: {} }, action) => {
     switch (action.type) {
         case REGISTER_USER_REQUEST:
         case LOGIN_REQUEST:
+        case LOAD_USER_REQUEST:
             return {
                 loading: true,
                 isAuthenticated: false,
             }
         case REGISTER_USER_SUCEESS:
         case LOGIN_SUCEESS:
+        case LOAD_USER_SUCEESS:
             return {
                 ...state,
                 loading: false,
@@ -29,6 +34,14 @@ const userReducer = (state = { user: {} }, action) => {
         case LOGIN_FAIL:
             return {
                 ...state,
+                loading: false,
+                isAuthenticated: false,
+                user: null,
+                error: action.payload,
+            }
+
+        case LOAD_USER_FAIL:
+            return {
                 loading: false,
                 isAuthenticated: false,
                 user: null,
