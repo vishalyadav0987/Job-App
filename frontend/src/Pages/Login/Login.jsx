@@ -24,12 +24,13 @@ import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
 import { Link, useNavigate } from 'react-router-dom'
 import { clearError, login } from '../../redux/actions/userAction';
 import toast from 'react-hot-toast';
+import Cookies from 'js-cookie'
 
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { error, loading, isAuthenticated, message } = useSelector((state) => state.user);
+    const { error, loading, isAuthenticated, message,token } = useSelector((state) => state.user);
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [role, setRole] = useState("");
@@ -45,8 +46,8 @@ export default function Login() {
             dispatch(clearError());
         }
         if (isAuthenticated) {
+            Cookies.set('token', token); // लॉगिन के बाद कुकीज़ में टोकन सेट करें
             navigate('/');
-            // Cookies.set('token', token); // लॉगिन के बाद कुकीज़ में टोकन सेट करें
         }
         if (message) {
             toast.success(message);

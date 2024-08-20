@@ -25,12 +25,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import useImagePreview from '../../CustomHook/useImagePreview'
 import { clearError, register } from '../../redux/actions/userAction';
 import toast from 'react-hot-toast';
+import Cookies from 'js-cookie'
 
 export default function Register() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
-    const { error, loading, isAuthenticated, message } = useSelector((state) => state.user);
+    const { error, loading, isAuthenticated, message, token } = useSelector((state) => state.user);
     const { handleImageOnChange, imageUrl } = useImagePreview();
     const [inputs, setInputs] = useState({
         fullname: "",
@@ -72,8 +73,8 @@ export default function Register() {
             dispatch(clearError());
         }
         if (isAuthenticated) {
-            navigate('/login');
-            // Cookies.set('token', token); // लॉगिन के बाद कुकीज़ में टोकन सेट करें
+            Cookies.set('token', token); // लॉगिन के बाद कुकीज़ में टोकन सेट करें
+            navigate('/');
         }
         if (message) {
             toast.success(message);
