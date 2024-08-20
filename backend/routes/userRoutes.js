@@ -5,13 +5,15 @@ const {
     login,
     logout,
     updateProfile,
+    getUserOwnDetails,
 } = require('../controllers/userControllers');
 const protectedRoute = require('../middleware/protectedRoute')
 
 
 router.route('/register').post(register);
 router.route('/login').post(login);
-router.route('/logout').post(logout);
+router.route('/logout').get(logout);
+router.route('/me').get(protectedRoute, getUserOwnDetails);
 router.route('/profile/update').post(protectedRoute, updateProfile);
 
 
