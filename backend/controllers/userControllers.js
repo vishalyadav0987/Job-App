@@ -8,6 +8,7 @@ const cloudinary = require('cloudinary').v2;
 const register = async (req, res) => {
     const { fullname, email, password, phoneNumber, role } = req.body;
     try {
+        let { profilePic } = req.body;
         if (!fullname || !email || !password || !phoneNumber || !role) {
             return res.json({
                 success: false,
@@ -23,6 +24,11 @@ const register = async (req, res) => {
             });
         }
 
+        if (profilePic) {
+            const uploadProfileImg = await cloudinary.uploader.upload(profilePic);
+            profilePic = uploadProfileImg.secure_url
+        }
+
         const hassedPassword = await bcryptjs.hash(password, 10);
 
         const newUser = new UserSchema({
@@ -31,9 +37,14 @@ const register = async (req, res) => {
             password: hassedPassword,
             phoneNumber,
             role,
+            profile: {
+                profilePic,
+            }
         });
 
         await newUser.save();
+
+        const token = generateAndSetToken(res, newUser._id);
 
         res.json({
             success: true,
@@ -41,7 +52,8 @@ const register = async (req, res) => {
             data: {
                 ...newUser._doc,
                 password: undefined,
-            }
+            },
+            token,
         })
     } catch (error) {
         console.log("Error in Register function -> ", error.message);
@@ -86,14 +98,16 @@ const login = async (req, res) => {
         }
 
 
-        generateAndSetToken(res, userExsits._id);
+        const token = generateAndSetToken(res, userExsits._id);
 
         res.json({
             success: true,
             data: {
                 ...userExsits._doc,
                 password: undefined,
-            }
+            },
+            token,
+            message: "User Successfully logged in!"
         })
 
     } catch (error) {
@@ -107,7 +121,7 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        res.cookie("token", "", { maxAge: 1 });
+        res.cookie("token", null, { maxAge: 1 });
         res.json({
             success: true,
             message: "User logout successfully.",
@@ -124,9 +138,10 @@ const updateProfile = async (req, res) => {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
     // let { resume } = req.body;
     // const originNameResume = resume;
+    let { profilePic } = req.body;
     try {
         const userId = req.user;
-        console.log(userId)
+
         if (!fullname || !email || !bio || !phoneNumber || !skills) {
             return res.json({
                 success: false,
@@ -143,19 +158,30 @@ const updateProfile = async (req, res) => {
             });
         }
 
+        if (profilePic) {
+            if (user.profile.profilePic) {
+                await cloudinary.uploader.destroy(user.profile.profilePic.split('/').pop().split(".")[0])
+            }
+            const uploadProfileImg = await cloudinary.uploader.upload(profilePic);
+            profilePic = uploadProfileImg.secure_url
+        }
+
+        if (resume) {
+            if (user.profile.resume) {
+                await cloudinary.uploader.destroy(user.profile.resume.split('/').pop().split(".")[0])
+            }
+            const uploadResume = await cloudinary.uploader.upload(resume);
+            resume = uploadResume.secure_url;
+        }
+
         user.fullname = fullname;
         user.email = email;
         user.phoneNumber = phoneNumber;
         user.profile.bio = bio;
         user.profile.skills = skillsArray;
-
-        // if (resume) {
-        //     const uploadResume = await cloudinary.uploader.upload(resume);
-        //     resume = uploadResume.secure_url;
-        // }
-
-        // user.profile.resume = resume;
-        // user.profile.resumeOriginalName = `${originNameResume}` // Save the original file name
+        user.profile.profilePic = profilePic || user.profile.profilePic;
+        user.profile.resume = resume || user.profile.resume;
+        user.profile.resumeOriginalName = `${originNameResume}` // Save the original file name
 
         await user.save();
 
@@ -177,10 +203,26 @@ const updateProfile = async (req, res) => {
     }
 }
 
+const getUserOwnDetails = async (req, res) => {
+    try {
+        const userId = req.user;
+        const userMe = await UserSchema.findById(userId);
+        res.json({ success: true, data: userMe });
+    } catch (error) {
+        console.error("Error in getUserOwnDetails function: ", error.message);
+        res.status(500).json({
+            success: false,
+            message: "Something went wrong!!",
+            error: error.message
+        });
+    }
+}
+
 
 module.exports = {
     register,
     login,
     logout,
     updateProfile,
+    getUserOwnDetails,
 }
