@@ -2,21 +2,29 @@ const express = require('express');
 const app = express()
 const connectDB = require('./connectDB/connect');
 require('dotenv').config();
-// const PORT = process.env.PORT || 5000;
-const PORT = 3000 || 5000;
+const PORT = process.env.PORT || 5000;
+const cloudinary = require('cloudinary').v2;
 const cookieParser = require('cookie-parser');
 const userRoutes = require('./routes/userRoutes')
 const companyRoutes = require('./routes/companyRoutes')
 const jobRoutes = require('./routes/jobRoutes')
+const applicationRoutes = require('./routes/applicationRoutes');
 
 app.use(express.json({ limit: "50mb" }));// parse payload data
 app.use(express.urlencoded({ extended: true })); // to parse form data
-app.use(cookieParser())
+app.use(cookieParser());
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_SECRET_KEY
+})
 
 
 app.use("/api/v1/user", userRoutes);
 app.use("/api/v1/company", companyRoutes);
 app.use("/api/v1/job", jobRoutes);
+app.use("/api/v1/application", applicationRoutes);
 
 
 
