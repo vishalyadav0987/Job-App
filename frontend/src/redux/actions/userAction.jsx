@@ -7,10 +7,14 @@ import {
     LOGIN_FAIL,
     LOGIN_REQUEST,
     LOGIN_SUCEESS,
+    LOGOUT_USER_FAIL,
+    LOGOUT_USER_REQUEST,
+    LOGOUT_USER_SUCEESS,
     REGISTER_USER_FAIL,
     REGISTER_USER_REQUEST,
     REGISTER_USER_SUCEESS,
 } from '../constants/userConstants';
+import Cookies from 'js-cookie'
 
 
 // REGISTER
@@ -29,7 +33,8 @@ const register = (userData) => async (dispatch) => {
             dispatch({
                 type: REGISTER_USER_SUCEESS,
                 payload: response.data,
-            })
+            });
+            Cookies.set('token', response.data.token);
         }
         else {
             dispatch({
@@ -62,7 +67,8 @@ const login = (email, password, role) => async (dispatch) => {
             dispatch({
                 type: LOGIN_SUCEESS,
                 payload: response.data,
-            })
+            });
+            Cookies.set('token', response.data.token);
         }
         else {
             dispatch({
@@ -90,12 +96,11 @@ const loadUser = () => async (dispatch) => {
             dispatch({
                 type: LOAD_USER_SUCEESS,
                 payload: response.data,
-            })
+            });
         }
         else {
             dispatch({
                 type: LOAD_USER_FAIL,
-                payload: response.data.message,
             })
         }
     } catch (error) {
@@ -108,9 +113,31 @@ const loadUser = () => async (dispatch) => {
     }
 }
 
+// LOGOUT USER
+const logout = () => async (dispatch) => {
+    try {
+        dispatch({ type: LOGOUT_USER_REQUEST });
+        const response = await axios.get(
+            '/api/v1/user/logout'
+        );
+        if (response.data.success) {
+            dispatch({
+                type: LOGOUT_USER_SUCEESS,
+            })
+        }
+    } catch (error) {
+        dispatch({
+            type: LOGOUT_USER_FAIL,
+            payload: error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message,
+        });
+    }
+}
+
 // clearing Error
 const clearError = () => async (dispatch) => {
     dispatch({ type: CLEAR_ERRORS });
 }
 
-export { register, login, loadUser, clearError };
+export { register, login, loadUser, logout, clearError };
