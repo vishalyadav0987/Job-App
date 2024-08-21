@@ -49,7 +49,7 @@ const userReducer = (state = { user: {} }, action) => {
         case LOGOUT_USER_SUCEESS:
             return {
                 loading: false,
-                isAuthenticate: false,
+                isAuthenticated: false,
                 user: null,
             }
         case REGISTER_USER_FAIL:
