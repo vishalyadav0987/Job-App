@@ -15,6 +15,14 @@ import {
     useColorModeValue,
     useBreakpointValue,
     useDisclosure,
+    Avatar,
+    Portal,
+    PopoverArrow,
+    PopoverHeader,
+    PopoverCloseButton,
+    PopoverBody,
+    Divider,
+    Heading,
 } from '@chakra-ui/react';
 import {
     HamburgerIcon,
@@ -24,17 +32,28 @@ import {
 } from '@chakra-ui/icons';
 import { Link } from 'react-router-dom';
 import Mode from '../../Mode(LIight and dark)/Mode';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../redux/actions/userAction';
+import toast from 'react-hot-toast';
+import Logo from '../../Svgs/Logo';
+import { ImProfile } from "react-icons/im";
+import { IoIosLogOut } from "react-icons/io";
 
 export default function Navbar() {
     const { isOpen, onToggle } = useDisclosure();
-
+    const dispatch = useDispatch();
+    const { isAuthenticated, user, loading } = useSelector((state) => state.user);
+    const handleLogout = async () => {
+        dispatch(logout());
+        toast.success("User Succesfully logout!")
+    }
     return (
         <Box>
             <Flex
                 bg={useColorModeValue('white', 'gray.800')}
                 color={useColorModeValue('gray.600', 'white')}
                 minH={'60px'}
-                py={{ base: 2 }}
+                py={{ base: 3 }}
                 px={{ base: 4 }}
                 borderBottom={1}
                 borderStyle={'solid'}
@@ -51,17 +70,22 @@ export default function Navbar() {
                         aria-label={'Toggle Navigation'}
                     />
                 </Flex>
-                <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }}>
+                <Flex flex={{ base: 1 }} justify={{ base: 'center', md: 'start' }} alignItems={"center"}>
                     <Text
                         textAlign={useBreakpointValue({ base: 'center', md: 'left' })}
                         fontFamily={'heading'}
                         fontWeight={"bold"}
                         color={useColorModeValue('gray.800', 'white')}>
-                        Job Portal
+                        <Link to={"/"}>
+                            <Flex alignItems={"center"} gap={1.5}>
+                                <Logo color={useColorModeValue('gray.700', 'white')} />
+                                <Heading size={"md"}>Job Finder</Heading>
+                            </Flex>
+                        </Link>
                     </Text>
 
                     <Flex display={{ base: 'none', md: 'flex' }} ml={10}>
-                        <DesktopNav />
+                        <DesktopNav user={user} />
                     </Flex>
                 </Flex>
 
@@ -71,59 +95,113 @@ export default function Navbar() {
                     alignItems={"center"}
                     direction={'row'}
                     spacing={6}>
-                    <Mode top={"13px"} right={"180px"}/>
-                    <Link to={"/login"}>
-                        <Button fontSize={'sm'} fontWeight={400} variant={'link'}>
-                            Sign In
-                        </Button>
-                    </Link>
-                    <Link to={'/register'}>
-                        <Button
-                            display={{ base: 'none', md: 'inline-flex' }}
-                            fontSize={'sm'}
-                            fontWeight={600}
-                            color={'white'}
-                            bg={'pink.400'}
-                            _hover={{
-                                bg: 'pink.300',
-                            }}>
-                            Sign Up
-                        </Button>
-                    </Link>
+                    <Mode top={user ? "20px" : "14px"} right={user ? "80px" : "180px"} index={100} />
+                    {
+                        user && isAuthenticated ?
+                            <>
+
+                                <Popover trigger={'hover'} placement={'bottom-start'}>
+                                    <PopoverTrigger>
+                                        <Avatar size="md"
+                                            src={user && user?.profile.profilePic}>
+                                        </Avatar>
+                                    </PopoverTrigger>
+                                    <Portal>
+                                        <PopoverContent>
+                                            <PopoverArrow />
+                                            <PopoverHeader>Header</PopoverHeader>
+                                            <PopoverCloseButton />
+                                            <PopoverBody>
+                                                {
+                                                    user && user.role === "student" &&
+                                                    <>
+                                                        <Link to={'/profile/update'} style={{
+                                                            display: "flex",
+                                                            alignItems: "center",
+                                                            gap: "8px",
+                                                            marginBottom: "12px"
+                                                        }}>
+                                                            <ImProfile />
+                                                            <Text>View Profile</Text>
+                                                        </Link>
+                                                        <Divider mb={3} />
+                                                    </>
+                                                }
+                                                <Button
+                                                    display={"flex"}
+                                                    alignItems={"center"}
+                                                    gap={2}
+                                                    bg={"#48bb78"}
+                                                    _hover={{
+                                                        bg: "#22543d"
+                                                    }}
+                                                    isLoading={loading}
+                                                    onClick={handleLogout}
+                                                >
+                                                    <IoIosLogOut />
+                                                    Logout</Button>
+                                            </PopoverBody>
+                                        </PopoverContent>
+                                    </Portal>
+                                </Popover>
+
+                            </>
+                            : <>
+                                <Link to={"/login"}>
+                                    <Button fontSize={'sm'} fontWeight={400} variant={'link'}>
+                                        Sign In
+                                    </Button>
+                                </Link>
+                                <Link to={'/register'}>
+                                    <Button
+                                        display={{ base: 'none', md: 'inline-flex' }}
+                                        fontSize={'sm'}
+                                        fontWeight={600}
+                                        color={'white'}
+                                        bg={'#48bb78'}
+                                        _hover={{
+                                            bg: '#22543d',
+                                        }}>
+                                        Sign Up
+                                    </Button>
+                                </Link>
+                            </>
+                    }
                 </Stack>
             </Flex>
 
             <Collapse in={isOpen} animateOpacity>
-                <MobileNav />
+                <MobileNav user={user} />
             </Collapse>
         </Box>
     );
 }
 
-const DesktopNav = () => {
+const DesktopNav = ({ user }) => {
+    const navLinks = user && user.role === "student" ? NAV_ITEMS : NAV_ITEMS1
     const linkColor = useColorModeValue('gray.600', 'gray.200');
     const linkHoverColor = useColorModeValue('gray.800', 'white');
     const popoverContentBgColor = useColorModeValue('white', 'gray.800');
 
     return (
         <Stack direction={'row'} spacing={4}>
-            {NAV_ITEMS.map((navItem) => (
+            {navLinks.map((navItem) => (
                 <Box key={navItem.label}>
                     <Popover trigger={'hover'} placement={'bottom-start'}>
                         <PopoverTrigger>
-                            <Box
+                            <Link
                                 as="a"
                                 p={2}
-                                href={navItem.href ?? '#'}
+                                to={navItem.href ?? '#'}
                                 fontSize={'sm'}
-                                fontWeight={500}
+                                fontWeight={600}
                                 color={linkColor}
                                 _hover={{
                                     textDecoration: 'none',
                                     color: linkHoverColor,
                                 }}>
                                 {navItem.label}
-                            </Box>
+                            </Link>
                         </PopoverTrigger>
 
                         {navItem.children && (
@@ -149,10 +227,11 @@ const DesktopNav = () => {
 };
 
 const DesktopSubNav = ({ label, href, subLabel }) => {
+
     return (
-        <Box
+        <Link
             as="a"
-            href={href}
+            to={href}
             role={'group'}
             display={'block'}
             p={2}
@@ -179,14 +258,15 @@ const DesktopSubNav = ({ label, href, subLabel }) => {
                     <Icon color={'pink.400'} w={5} h={5} as={ChevronRightIcon} />
                 </Flex>
             </Stack>
-        </Box>
+        </Link>
     );
 };
 
-const MobileNav = () => {
+const MobileNav = ({ user }) => {
+    const navLinks = user && user.role === "student" ? NAV_ITEMS : NAV_ITEMS1
     return (
         <Stack bg={useColorModeValue('white', 'gray.800')} p={4} display={{ md: 'none' }}>
-            {NAV_ITEMS.map((navItem) => (
+            {navLinks.map((navItem) => (
                 <MobileNavItem key={navItem.label} {...navItem} />
             ))}
         </Stack>
@@ -198,10 +278,10 @@ const MobileNavItem = ({ label, children, href }) => {
 
     return (
         <Stack spacing={4} onClick={children && onToggle}>
-            <Box
+            <Link
                 py={2}
                 as="a"
-                href={href ?? '#'}
+                to={href ?? '#'}
                 justifyContent="space-between"
                 alignItems="center"
                 _hover={{
@@ -219,7 +299,7 @@ const MobileNavItem = ({ label, children, href }) => {
                         h={6}
                     />
                 )}
-            </Box>
+            </Link>
 
             <Collapse in={isOpen} animateOpacity style={{ marginTop: '0!important' }}>
                 <Stack
@@ -231,9 +311,9 @@ const MobileNavItem = ({ label, children, href }) => {
                     align={'start'}>
                     {children &&
                         children.map((child) => (
-                            <Box as="a" key={child.label} py={2} href={child.href}>
+                            <Link as="a" key={child.label} py={2} to={child.href}>
                                 {child.label}
-                            </Box>
+                            </Link>
                         ))}
                 </Stack>
             </Collapse>
@@ -282,3 +362,18 @@ const NAV_ITEMS = [
         ],
     },
 ];
+
+const NAV_ITEMS1 = [
+    {
+        label: 'Home',
+        href: '/',
+    },
+    {
+        label: 'Company',
+        href: '/admin/companies',
+    },
+    {
+        label: 'Job',
+        href: '/admin/jobs',
+    },
+]
