@@ -13,6 +13,9 @@ import {
     REGISTER_USER_FAIL,
     REGISTER_USER_REQUEST,
     REGISTER_USER_SUCEESS,
+    UPDATE_PROFILE_FAIL,
+    UPDATE_PROFILE_REQUEST,
+    UPDATE_PROFILE_SUCEESS,
 } from '../constants/userConstants';
 import Cookies from 'js-cookie'
 
@@ -135,9 +138,44 @@ const logout = () => async (dispatch) => {
     }
 }
 
+
+// UPDATE PROFILE
+const updateProfile = (userData) => async (dispatch) => {
+    try {
+        dispatch({ type: UPDATE_PROFILE_REQUEST });
+        const response = await axios.post(
+            '/api/v1/user/profile/update',
+            userData,
+            { headers: { "Content-Type": "application/json" } }
+        );
+
+
+
+        if (response.data.success) {
+            dispatch({
+                type: UPDATE_PROFILE_SUCEESS,
+                payload: response.data,
+            });
+        }
+        else {
+            dispatch({
+                type: UPDATE_PROFILE_FAIL,
+                payload: response.data.message,
+            })
+        }
+    } catch (error) {
+        dispatch({
+            type: UPDATE_PROFILE_FAIL,
+            payload: error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message,
+        });
+    }
+}
+
 // clearing Error
 const clearError = () => async (dispatch) => {
     dispatch({ type: CLEAR_ERRORS });
 }
 
-export { register, login, loadUser, logout, clearError };
+export { register, login, loadUser, logout, updateProfile, clearError };
