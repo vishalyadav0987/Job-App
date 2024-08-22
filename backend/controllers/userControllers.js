@@ -136,9 +136,8 @@ const logout = async (req, res) => {
 // UPDATE PROFILE
 const updateProfile = async (req, res) => {
     const { fullname, email, phoneNumber, bio, skills } = req.body;
-    // let { resume } = req.body;
-    // const originNameResume = resume;
-    let { profilePic } = req.body;
+    let { profilePic, resume } = req.body;
+    const originNameResume = resume;
     try {
         const userId = req.user;
 
@@ -195,7 +194,7 @@ const updateProfile = async (req, res) => {
         });
 
     } catch (error) {
-        console.log("Error in updateProfile function -> ", error.message);
+        console.log("Error in updateProfile function -> ", error);
         res.json({
             success: false,
             message: error.message,
