@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     Table,
     Thead,
@@ -23,14 +23,41 @@ import {
     PopoverContent,
     PopoverArrow,
     PopoverCloseButton,
-    Text
+    Text,
+    Spinner
 } from '@chakra-ui/react'
 import { BsThreeDots } from "react-icons/bs";
 import { EditIcon } from '@chakra-ui/icons';
 import { Link } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux'
+import toast from 'react-hot-toast'
+import { clearErrors, getALLCompany } from '../../../redux/actions/companyAction';
 
 const Compines = () => {
-    const { colorMode } = useColorMode()
+    const dispatch = useDispatch()
+    const { companies, error, loading } = useSelector(state => state.getAllCompany);
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+            dispatch(clearErrors());
+        }
+        dispatch(getALLCompany());
+    }, [error, dispatch]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    })
+
+    if (loading) {
+        return (
+            <>
+                <Flex w={"100vw"} height={"40vh"}>
+                    <Spinner size={"xl"} />
+                </Flex>
+            </>
+        )
+    }
     return (
         <>
             <Box w={"full"} py={12} minH={"60vh"}>
@@ -63,37 +90,58 @@ const Compines = () => {
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                <Tr borderBottom="1px solid #3c3c3c">
-                                    <Td>
-                                        <Avatar src='./vite.svg' />
-                                    </Td>
-                                    <Td>Google</Td>
-                                    <Td>24-08-25</Td>
-                                    <Td>
-                                        <Popover>
-                                            <PopoverTrigger>
-                                                <IconButton
-                                                    icon={<BsThreeDots />}
-                                                />
-                                            </PopoverTrigger>
-                                            <PopoverContent>
-                                                <PopoverArrow />
-                                                <PopoverCloseButton />
-                                                <PopoverBody>
-                                                    <Box>
-                                                        <Link to={` /admin/company/1`}>
-                                                            <Flex alignItems={"center"} gap={2}>
-                                                                <EditIcon />
-                                                                <Text>Edit Company Details</Text>
-                                                            </Flex>
-                                                        </Link>
-                                                    </Box>
-                                                </PopoverBody>
-                                            </PopoverContent>
-                                        </Popover>
-                                    </Td>
-                                </Tr>
-
+                                {
+                                    companies && companies?.length > 0 &&
+                                    companies.map((company) => {
+                                        return (
+                                            <>
+                                                <Tr borderBottom="1px solid #3c3c3c">
+                                                    <Td>
+                                                        <Avatar src={companies && company.logoImg} />
+                                                    </Td>
+                                                    <Td>{companies && company.name}</Td>
+                                                    <Td>
+                                                        {
+                                                            companies &&
+                                                            company.createdAt.substring(0, 10)
+                                                                .split("-")
+                                                                .reverse()
+                                                                .join('-')
+                                                        }
+                                                    </Td>
+                                                    <Td>
+                                                        <Popover>
+                                                            <PopoverTrigger>
+                                                                <IconButton
+                                                                    icon={<BsThreeDots />}
+                                                                />
+                                                            </PopoverTrigger>
+                                                            <PopoverContent>
+                                                                <PopoverArrow />
+                                                                <PopoverCloseButton />
+                                                                <PopoverBody>
+                                                                    <Box>
+                                                                        <Link
+                                                                            to={
+                                                                                `/admin/company/${company._id}`
+                                                                            }
+                                                                        >
+                                                                            <Flex alignItems={"center"} gap={2}
+                                                                            >
+                                                                                <EditIcon />
+                                                                                <Text>Edit Company Details</Text>
+                                                                            </Flex>
+                                                                        </Link>
+                                                                    </Box>
+                                                                </PopoverBody>
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                    </Td>
+                                                </Tr>
+                                            </>
+                                        )
+                                    })
+                                }
                             </Tbody>
                         </Table>
                     </TableContainer>
