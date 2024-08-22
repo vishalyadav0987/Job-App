@@ -9,7 +9,7 @@ import { MdLocationPin } from "react-icons/md";
 import { ArrowBackIcon } from '@chakra-ui/icons';
 import { useDispatch, useSelector } from 'react-redux'
 import toast from 'react-hot-toast'
-import { clearErrors, updateCompanyDetails } from '../../../redux/actions/companyAction';
+import { clearErrors, getCompanyById, updateCompanyDetails } from '../../../redux/actions/companyAction';
 import { UPDATE_COMPANY_DETAILS_RESET } from '../../../redux/constants/companyConstant';
 
 
@@ -20,7 +20,8 @@ const CompanySetup = () => {
     const dispatch = useDispatch();
     const { handleImageOnChange, imageUrl } = useImagePreview();
     const { company } = useSelector(state => state.newCompany)
-    const { loading, message, error, isUpdated } = useSelector(state => state.updateCompany)
+    const { loading, message, error, isUpdated } = useSelector(state => state.updateCompany);
+    const { error: singleCompanyError, company: singleCompany } = useSelector(state => state.singalCompanyById);
     const [inputs, setInputs] = useState({
         name: company && company.name,
         description: "",
@@ -50,6 +51,22 @@ const CompanySetup = () => {
     }
 
     useEffect(() => {
+        if (singleCompany && singleCompany._id !== id) {
+            dispatch(getCompanyById(id));
+        }
+        else {
+            setInputs({
+                name: singleCompany.name || "",
+                description: singleCompany.description || "",
+                location: singleCompany.location || "",
+                website: singleCompany.website || "",
+            });
+
+        }
+        if (singleCompanyError) {
+            alert.error(singleCompanyError);
+            dispatch(clearErrors())
+        }
         if (error) {
             toast.error(error);
             dispatch(clearErrors());
@@ -61,8 +78,9 @@ const CompanySetup = () => {
                 type: UPDATE_COMPANY_DETAILS_RESET,
             })
         }
-        
-    }, [isUpdated, dispatch, error, navigate]);
+
+    }, [isUpdated, dispatch, error, navigate, singleCompanyError, singleCompany, id]);
+
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -152,7 +170,10 @@ const CompanySetup = () => {
                                     <Stack direction={['column', 'row']} spacing={6}>
                                         <Center>
                                             <Avatar size="md"
-                                                src={imageUrl && imageUrl}>
+                                                src={
+                                                    (imageUrl && imageUrl)
+                                                    || (singleCompany && singleCompany.logoImg)
+                                                }>
                                             </Avatar>
                                         </Center>
                                         <Center w="full">
