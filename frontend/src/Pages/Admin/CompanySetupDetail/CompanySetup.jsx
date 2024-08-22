@@ -1,16 +1,72 @@
 import { Avatar, Box, Button, Center, Flex, FormControl, FormLabel, Heading, HStack, Input, InputGroup, InputRightElement, Stack, useColorModeValue, Text, InputLeftElement } from '@chakra-ui/react'
-import React, { useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import useImagePreview from '../../../CustomHook/useImagePreview';
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { FaBuilding } from "react-icons/fa";
 import { MdEditNote } from "react-icons/md";
 import { IoIosLink } from "react-icons/io";
 import { MdLocationPin } from "react-icons/md";
 import { ArrowBackIcon } from '@chakra-ui/icons';
+import { useDispatch, useSelector } from 'react-redux'
+import toast from 'react-hot-toast'
+import { clearErrors, updateCompanyDetails } from '../../../redux/actions/companyAction';
+import { UPDATE_COMPANY_DETAILS_RESET } from '../../../redux/constants/companyConstant';
+
 
 const CompanySetup = () => {
+    const { id } = useParams()
     const imageRef = useRef(null);
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const { handleImageOnChange, imageUrl } = useImagePreview();
+    const { company } = useSelector(state => state.newCompany)
+    const { loading, message, error, isUpdated } = useSelector(state => state.updateCompany)
+    const [inputs, setInputs] = useState({
+        name: company && company.name,
+        description: "",
+        location: company && company.location,
+        website: "",
+    });
+
+    const handleOnchange = (e) => {
+        const name = e.target.name;
+        const value = e.target.value;
+        setInputs({ ...inputs, [name]: value });
+    }
+
+    const handleUpdateCompany = async (e) => {
+        e.preventDefault();
+        const formData = new FormData();
+        formData.set("name", inputs.name);
+        formData.set("description", inputs.description);
+        formData.set("location", inputs.location);
+        formData.set("website", inputs.website);
+
+        if (imageUrl) {
+            formData.append("logoImg", imageUrl);
+        }
+
+        dispatch(updateCompanyDetails(id, formData))
+    }
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+            dispatch(clearErrors());
+        }
+        if (isUpdated) {
+            toast.success(message);
+            navigate('/admin/companies');
+            dispatch({
+                type: UPDATE_COMPANY_DETAILS_RESET,
+            })
+        }
+        
+    }, [isUpdated, dispatch, error, navigate]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    })
     return (
         <>
             <Flex align={'center'} justify={'center'}>
@@ -20,7 +76,7 @@ const CompanySetup = () => {
                             Company Setup
                         </Heading>
                     </Stack>
-                    <form>
+                    <form onSubmit={handleUpdateCompany}>
                         <Box
                             rounded={'lg'}
                             bg={useColorModeValue('white', 'gray.900')}
@@ -35,8 +91,10 @@ const CompanySetup = () => {
                                                 <FaBuilding color='#c5c5c5' />
                                             </InputLeftElement>
                                             <Input focusBorderColor='#48bb78' type="text"
-                                                name="companyName"
+                                                name="name"
                                                 placeholder='Enter company name'
+                                                onChange={handleOnchange}
+                                                value={inputs.name}
                                             />
                                         </InputGroup>
                                     </FormControl>
@@ -51,6 +109,8 @@ const CompanySetup = () => {
                                             <Input focusBorderColor='#48bb78' type="type"
                                                 name="description"
                                                 placeholder='description'
+                                                onChange={handleOnchange}
+                                                value={inputs.description}
                                             />
                                         </InputGroup>
 
@@ -66,6 +126,8 @@ const CompanySetup = () => {
                                             <Input focusBorderColor='#48bb78' type="text"
                                                 name="website"
                                                 placeholder='url'
+                                                onChange={handleOnchange}
+                                                value={inputs.website}
                                             />
                                         </InputGroup>
 
@@ -79,6 +141,8 @@ const CompanySetup = () => {
                                             <Input focusBorderColor='#48bb78' type='text'
                                                 name="location"
                                                 placeholder='company location'
+                                                onChange={handleOnchange}
+                                                value={inputs.location}
                                             />
                                         </InputGroup>
 
@@ -105,7 +169,8 @@ const CompanySetup = () => {
                                 <Stack spacing={10} pt={2}>
                                     <Button
                                         type='submit'
-                                        loadingText="Submitting"
+                                        loadingText="Updating"
+                                        isLoading={loading}
                                         size="lg"
                                         bg={'#48bb78'}
                                         color={'white'}
@@ -117,11 +182,11 @@ const CompanySetup = () => {
                                 </Stack>
                                 <Stack pt={6}>
                                     <Button align={'center'} w={"fit-content"}>
-                                        <Link to={'/admin/company/create'} 
-                                        style={{
-                                            display:'flex',alignItems:"center",
-                                            justifyContent:"center",
-                                            gap:"6px"
+                                        <Link to={'/admin/company/create'}
+                                            style={{
+                                                display: 'flex', alignItems: "center",
+                                                justifyContent: "center",
+                                                gap: "6px"
                                             }}>
                                             <ArrowBackIcon
                                                 fontSize={"20px"} />
