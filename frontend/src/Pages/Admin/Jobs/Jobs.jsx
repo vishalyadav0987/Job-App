@@ -49,11 +49,11 @@ const Jobs = () => {
 
     if (loading) {
         return (
-            <>
-                <Flex w={"100vw"} height={"40vh"}>
-                    <Spinner size={"xl"} />
-                </Flex>
-            </>
+
+            <Flex w={"100vw"} height={"40vh"} alignItems={"center"} justifyContent={"center"}>
+                <Spinner size={"xl"} />
+            </Flex>
+
         )
     }
 
