@@ -1,4 +1,4 @@
-import { CLEAR_ERRORS, GET_ALL_JOB_PRESENT_ADMIN_FAIL, GET_ALL_JOB_PRESENT_ADMIN_REQUEST, GET_ALL_JOB_PRESENT_ADMIN_SUCEESS, POST_NEW_JOB_FAIL, POST_NEW_JOB_REQUEST, POST_NEW_JOB_SUCEESS } from "../constants/jobConstants"
+import { CLEAR_ERRORS, GET_ALL_JOB_PRESENT_ADMIN_FAIL, GET_ALL_JOB_PRESENT_ADMIN_REQUEST, GET_ALL_JOB_PRESENT_ADMIN_SUCEESS, POST_NEW_JOB_FAIL, POST_NEW_JOB_REQUEST, POST_NEW_JOB_SUCEESS, SINGLE_JOB_DETAILS_FAIL, SINGLE_JOB_DETAILS_REQUEST, SINGLE_JOB_DETAILS_SUCEESS, UPDATE_JOB_DETIALS_FAIL, UPDATE_JOB_DETIALS_REQUEST, UPDATE_JOB_DETIALS_SUCEESS } from "../constants/jobConstants"
 import axios from 'axios'
 
 
@@ -63,9 +63,69 @@ const getAllJobsOfAdmin = () => async (dispatch) => {
     }
 }
 
+// GET JOB BY ID
+const jobById = (id) => async (dispatch) => {
+    try {
+        dispatch({ type: SINGLE_JOB_DETAILS_REQUEST })
+        const response = await axios.get(
+            `/api/v1/job/get/${id}` // of Admin
+        );
+        if (response.data.success) {
+            dispatch({
+                type: SINGLE_JOB_DETAILS_SUCEESS,
+                payload: response.data,
+            });
+        }
+        else {
+            dispatch({
+                type: SINGLE_JOB_DETAILS_FAIL,
+                payload: response.data.message,
+            });
+        }
+    } catch (error) {
+        dispatch({
+            type: SINGLE_JOB_DETAILS_FAIL,
+            payload: error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message,
+        });
+    }
+}
+
+//UPDATE JOB 
+const updateJob = (id, jobData) => async (dispatch) => {
+    try {
+        dispatch({ type: UPDATE_JOB_DETIALS_REQUEST })
+        const response = await axios.put(
+            `/api/v1/job/update/${id}`,
+            jobData,
+            { headers: { "Content-Type": "application/json" } },
+        );
+        if (response.data.success) {
+            dispatch({
+                type: UPDATE_JOB_DETIALS_SUCEESS,
+                payload: response.data,
+            });
+        }
+        else {
+            dispatch({
+                type: UPDATE_JOB_DETIALS_FAIL,
+                payload: response.data.message,
+            });
+        }
+    } catch (error) {
+        dispatch({
+            type: UPDATE_JOB_DETIALS_FAIL,
+            payload: error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message,
+        });
+    }
+}
+
 // clearing Error
 const clearError = () => async (dispatch) => {
     dispatch({ type: CLEAR_ERRORS });
 }
 
-export { postNewJob, getAllJobsOfAdmin, clearError }
+export { postNewJob, getAllJobsOfAdmin, jobById, updateJob, clearError }
