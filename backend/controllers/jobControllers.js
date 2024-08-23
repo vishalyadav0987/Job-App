@@ -12,11 +12,11 @@ const postJob = async (req, res) => {
             jobType,
             position,
             experience,
-            comapanyId
+            companyId
         } = req.body;
         const userId = req.user;
 
-        if (!title || !description || !requirements || !salary || !location || !jobType || !position || !experience || !comapanyId) {
+        if (!title || !description || !requirements || !salary || !location || !jobType || !position || !experience || !companyId) {
             return res.json({
                 success: false,
                 message: "Enter all information about the job."
@@ -32,7 +32,7 @@ const postJob = async (req, res) => {
             jobType,
             position,
             experienceLevel: experience,
-            comapanyId,
+            comapanyId:companyId,
             created_By: userId,
         });
 
