@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import {
     Table,
     Thead,
@@ -8,7 +8,6 @@ import {
     Td,
     TableCaption,
     TableContainer,
-    useColorMode,
     Button,
     Box,
     Flex,
@@ -22,14 +21,42 @@ import {
     PopoverArrow,
     PopoverCloseButton,
     Text,
-    Divider
+    Divider,
+    Spinner
 } from '@chakra-ui/react'
 import { BsEye, BsThreeDots } from "react-icons/bs";
 import { EditIcon } from '@chakra-ui/icons';
 import { Link } from 'react-router-dom';
+import toast from 'react-hot-toast'
+import { useSelector, useDispatch } from 'react-redux'
+import { clearError, getAllJobsOfAdmin } from '../../../redux/actions/jobActions';
 
 const Jobs = () => {
-    const { colorMode } = useColorMode()
+    const dispatch = useDispatch();
+    const { loading, error, jobs } = useSelector(state => state.adminAllJobs);
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+            dispatch(clearError());
+        }
+        dispatch(getAllJobsOfAdmin());
+    }, [error, dispatch]);
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    })
+
+    if (loading) {
+        return (
+            <>
+                <Flex w={"100vw"} height={"40vh"}>
+                    <Spinner size={"xl"} />
+                </Flex>
+            </>
+        )
+    }
+
     return (
         <>
             <Box w={"full"} py={12} minH={"60vh"}>
@@ -62,43 +89,60 @@ const Jobs = () => {
                                 </Tr>
                             </Thead>
                             <Tbody>
-                                <Tr borderBottom="1px solid #3c3c3c">
-                                    <Td>Google</Td>
-                                    <Td>
-                                       Full Stack Developer 
-                                    </Td>
-                                    <Td>24-08-25</Td>
-                                    <Td>
-                                        <Popover>
-                                            <PopoverTrigger>
-                                                <IconButton
-                                                    icon={<BsThreeDots />}
-                                                />
-                                            </PopoverTrigger>
-                                            <PopoverContent>
-                                                <PopoverArrow />
-                                                <PopoverCloseButton />
-                                                <PopoverBody>
-                                                    <Box>
-                                                        <Link to={`/admin/job/1`}>
-                                                            <Flex alignItems={"center"} gap={2}>
-                                                                <EditIcon />
-                                                                <Text>Edit Job Details</Text>
-                                                            </Flex>
-                                                        </Link>
-                                                        <Divider mb={2} mt={2}></Divider>
-                                                        <Link to={`/admin/job/1/applicants`}>
-                                                            <Flex alignItems={"center"} gap={2}>
-                                                                <BsEye />
-                                                                <Text>Applicants</Text>
-                                                            </Flex>
-                                                        </Link>
-                                                    </Box>
-                                                </PopoverBody>
-                                            </PopoverContent>
-                                        </Popover>
-                                    </Td>
-                                </Tr>
+                                {
+                                    jobs && jobs?.length > 0 &&
+                                    jobs.map((job) => {
+                                        return (
+                                            <>
+                                                <Tr borderBottom="1px solid #3c3c3c">
+                                                    <Td>
+                                                        {jobs && job.title}
+                                                    </Td>
+                                                    <Td>{jobs && job.comapanyId.name}</Td>
+                                                    <Td>
+                                                        {
+                                                            jobs &&
+                                                            job.createdAt.substring(0, 10)
+                                                                .split("-")
+                                                                .reverse()
+                                                                .join('-')
+                                                        }
+                                                    </Td>
+                                                    <Td>
+                                                        <Popover>
+                                                            <PopoverTrigger>
+                                                                <IconButton
+                                                                    icon={<BsThreeDots />}
+                                                                />
+                                                            </PopoverTrigger>
+                                                            <PopoverContent>
+                                                                <PopoverArrow />
+                                                                <PopoverCloseButton />
+                                                                <PopoverBody>
+                                                                    <Box>
+                                                                        <Link to={`/admin/job/${job?._id}`}>
+                                                                            <Flex alignItems={"center"} gap={2}>
+                                                                                <EditIcon />
+                                                                                <Text>Edit Job Details</Text>
+                                                                            </Flex>
+                                                                        </Link>
+                                                                        <Divider mb={2} mt={2}></Divider>
+                                                                        <Link to={`/admin/job/1/applicants`}>
+                                                                            <Flex alignItems={"center"} gap={2}>
+                                                                                <BsEye />
+                                                                                <Text>Applicants</Text>
+                                                                            </Flex>
+                                                                        </Link>
+                                                                    </Box>
+                                                                </PopoverBody>
+                                                            </PopoverContent>
+                                                        </Popover>
+                                                    </Td>
+                                                </Tr>
+                                            </>
+                                        )
+                                    })
+                                }
 
                             </Tbody>
                         </Table>
