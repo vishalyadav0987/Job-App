@@ -1,4 +1,5 @@
 const JobSchema = require('../models/JobSchema');
+const UserSchema = require('../models/UserSchema');
 
 // THIS ROUTE FOR OWNER/ADMIN/RECREUTER
 const postJob = async (req, res) => {
@@ -32,7 +33,7 @@ const postJob = async (req, res) => {
             jobType,
             position,
             experienceLevel: experience,
-            comapanyId:companyId,
+            comapanyId: companyId,
             created_By: userId,
         });
 
@@ -149,9 +150,55 @@ const getAllJobsOfAdmin = async (req, res) => {
     }
 }
 
+//Update Job 
+const updateJob = async (req, res) => {
+    const { id: _id } = req.params;
+    const userId = req.user;
+    try {
+        const user = await UserSchema.findById(userId);
+        if (!user) {
+            return res.json({
+                message: "User not Found!",
+                success: false,
+            })
+        }
+        if (user.role !== "recruiter") {
+            return res.json({
+                success: false,
+                message: "You can't access this route!",
+            })
+        }
+
+        const job = await JobSchema.findById(_id);
+
+        if (!job) {
+            return res.json({
+                message: "Job not Found!",
+                success: false,
+            })
+        }
+
+        const options = { new: true, runValidators: true };
+
+        await JobSchema.findByIdAndUpdate(_id, req.body, options);
+
+        res.json({
+            success: true,
+            message: "Job is successfully Updated!",
+        });
+    } catch (error) {
+        console.log("Error in updateJob function -> ", error.message);
+        res.json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
 module.exports = {
     postJob,
     getAllJobs,
     getJobById,
-    getAllJobsOfAdmin
+    getAllJobsOfAdmin,
+    updateJob,
 }
