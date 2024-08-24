@@ -53,7 +53,7 @@ const EditJobDetails = () => {
                 location: singleJob.location,
                 jobType: singleJob.jobType,
                 position: singleJob.position,
-                companyId: singleJob.comapanyId,
+                companyId: singleJob.comapanyId?._id,
             });
         }
 
@@ -80,7 +80,7 @@ const EditJobDetails = () => {
         dispatch(jobById(id));
 
         dispatch(getALLCompany());
-    }, [dispatch, navigate, singleJobError, error, id, updateError, isUpdate]);
+    }, [dispatch, navigate, singleJobError, error, id, updateError, isUpdate,]);
 
     if (singleJobLoading) {
         return (

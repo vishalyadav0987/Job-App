@@ -37,7 +37,7 @@ const CreateJob = () => {
 
     const handleSelectCompanyChange = (value) => {
         if (companies) {
-            const selectedCompany = companies.find((company) => company.name === value);            
+            const selectedCompany = companies.find((company) => company.name === value);
             setJobInputs({ ...jobInput, companyId: selectedCompany?._id })
         }
     }
@@ -74,7 +74,7 @@ const CreateJob = () => {
             toast.success(message);
             navigate(`/admin/jobs`);
             dispatch({
-                type:POST_NEW_JOB_RESET
+                type: POST_NEW_JOB_RESET
             })
         }
         dispatch(getALLCompany());
@@ -234,7 +234,7 @@ const CreateJob = () => {
 
                                                 handleSelectCompanyChange(e.target.value)
                                             }}
-                                           
+
                                         >
                                             {
                                                 companies && companies.length > 0 &&
