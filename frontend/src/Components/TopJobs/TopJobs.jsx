@@ -1,9 +1,9 @@
 import { Box, Flex, Grid, Heading } from '@chakra-ui/react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import JobCard from '../JobCard/JobCard'
 import { useLocation } from 'react-router-dom'
 
-const TopJobs = () => {
+const TopJobs = ({ arrayOfTopJob }) => {
     const location = useLocation();
 
     return (
@@ -31,12 +31,16 @@ const TopJobs = () => {
                         }
                         gap={4}
                     >
-                        <JobCard pathName={location.pathname} />
-                        <JobCard pathName={location.pathname} />
-                        <JobCard pathName={location.pathname} />
-                        <JobCard pathName={location.pathname} />
-                        <JobCard pathName={location.pathname} />
-                        <JobCard pathName={location.pathname} />
+                        {arrayOfTopJob && arrayOfTopJob.length > 0 ? (
+                            arrayOfTopJob.map((job) => <JobCard
+                                pathName={location.pathname}
+                                key={job._id} job={job} />)
+                        ) : (
+                            <Flex>
+                                <Heading size="md" >No jobs found.</Heading>
+                            </Flex>
+                        )}
+
                     </Grid>
                 </Box>
             </Box>

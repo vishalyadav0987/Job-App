@@ -19,22 +19,25 @@ import { FaHourglassHalf } from "react-icons/fa6";
 import { FaMoneyCheckAlt } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 
-const JobCard = ({ pathName }) => {
+const JobCard = ({ pathName, job }) => {
     return (
         <>
-            <Link to={"/job/detail/1"}>
-                <Card maxW='sm' gap={0}>
+            <Link to={`/job/detail/${job?._id}`}>
+                <Card maxW='sm'
+                    overflow="hidden"  // ensures content overflow is handled
+                    maxH={"450px"}
+                >
                     <CardHeader>
                         <Flex spacing='3'>
                             <Flex flex='1' gap='4' alignItems='center' flexWrap='wrap'>
                                 {
                                     !pathName &&
-                                    <Avatar name='Segun Adebayo' src='https://bit.ly/sage-adebayo' />
+                                    <Avatar name='Segun Adebayo' src={job && job?.comapanyId?.logoImg} />
 
                                 }
                                 <Box>
-                                    <Heading size='sm'>Company Name</Heading>
-                                    <Text color={"#c5c5c5"}>India</Text>
+                                    <Heading size='sm'>{job && job?.comapanyId?.name}</Heading>
+                                    <Text color={"#c5c5c5"}>{job && job?.comapanyId?.location}</Text>
                                 </Box>
                             </Flex>
                             {
@@ -50,15 +53,13 @@ const JobCard = ({ pathName }) => {
                     </CardHeader>
                     <CardBody>
                         <Flex justifyContent={"space-between"} alignItems={"center"} mb={2}>
-                            <Heading size='sm'>Title</Heading>
+                            <Heading size='sm'>{job && job?.title}</Heading>
                             {
                                 !pathName && <Text size={"xs"} color={"#c5c5c5"}>2 days ago</Text>
                             }
                         </Flex>
                         <Text>
-                            With Chakra UI, I wanted to sync the speed of development with the speed
-                            of design. I wanted the developer to be just as excited as the designer to
-                            create a screen.
+                            {job && job?.description}
                         </Text>
                     </CardBody>
 
@@ -73,18 +74,19 @@ const JobCard = ({ pathName }) => {
                         >
                             <Button flex='1'
                                 fontSize={"14px"}
-                                color={"blueviolet"} variant='ghost' leftIcon={<FaUserCheck />}>
-                                12 postion
+                                color={"#4ec7c2"} variant='ghost' leftIcon={<FaUserCheck />}>
+                                {job && job?.position} Position
                             </Button>
                             <Button flex='1'
                                 fontSize={"14px"}
-                                variant='ghost' color={"red"} leftIcon={<FaHourglassHalf />}>
-                                Part Time
+                                color={"#48bb78"}
+                                variant='ghost' leftIcon={<FaHourglassHalf />}>
+                                {job && job?.jobType}
                             </Button>
                             <Button flex='1'
                                 fontSize={"14px"}
-                                variant='ghost' color={"blue"} leftIcon={<FaMoneyCheckAlt />}>
-                                24 LPA
+                                variant='ghost' color={"#0596e8"} leftIcon={<FaMoneyCheckAlt />}>
+                                {job && job?.salary} LPA
                             </Button>
                         </Flex>
                         {
@@ -120,6 +122,7 @@ const JobCard = ({ pathName }) => {
                     </CardFooter>
                 </Card>
             </Link>
+
         </>
     )
 }
