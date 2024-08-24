@@ -1,7 +1,7 @@
 import { EmailIcon, PhoneIcon } from '@chakra-ui/icons'
-import { Avatar, Box, Button, Divider, Flex, Heading, IconButton, Text, useColorMode } from '@chakra-ui/react'
+import { Avatar, Box, Button, Divider, Flex, Grid, Heading, IconButton, Spinner, Text, useColorMode } from '@chakra-ui/react'
 import React, { useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { IoLocation } from "react-icons/io5";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { RiErrorWarningFill } from "react-icons/ri";
@@ -10,12 +10,58 @@ import { FaBuilding } from "react-icons/fa";
 import { MdDateRange } from "react-icons/md";
 import { MdNoteAlt } from "react-icons/md";
 import { LuFileType } from "react-icons/lu";
+import { FaRegAddressBook } from "react-icons/fa";
+import { FaUser } from "react-icons/fa";
+import toast from 'react-hot-toast'
+import { useDispatch, useSelector } from 'react-redux'
+import { clearError, jobById } from '../../redux/actions/jobActions'
+import { IoDocumentTextSharp } from "react-icons/io5";
+import { PiCertificateLight } from "react-icons/pi";
+import { IoTimeSharp } from "react-icons/io5";
+import { FaSun } from "react-icons/fa";
+import { PiSuitcaseSimpleFill } from "react-icons/pi";
+import { FaGraduationCap } from "react-icons/fa";
+import { FaPencilAlt } from "react-icons/fa";
+import { TbMessageLanguage } from "react-icons/tb";
+import { FaRegCalendarAlt } from "react-icons/fa";
 
 const JobDetailPage = () => {
+    const { id } = useParams();
     const { colorMode } = useColorMode();
+    const dispatch = useDispatch();
+    const { error, loading, job } = useSelector(state => state.newJob);
+
+    const requirementsHead = [
+        { tag: "Experience need", icon: <PiSuitcaseSimpleFill color={"#48bb78"} />, text: `${job && job.experienceLevel} year*` },
+        { tag: "Education", icon: <FaGraduationCap color={"#48bb78"} />, text: "Graduate" },
+        // { tag: "Skills", icon: <FaPencilAlt /> },
+        { tag: "Role/category", icon: <PiCertificateLight color={"#48bb78"} />, text: `${job && job.title}` },
+        { tag: "Hindi level", icon: <TbMessageLanguage color={"#48bb78"} />, text: "Hindi" },
+        { tag: "Age limit", icon: <FaRegCalendarAlt color={"#48bb78"} />, text: "21 - 30 years" },
+        { tag: "Gender", icon: <FaUser color={"#48bb78"} />, text: "M/F/T/O" },
+    ]
+
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+            dispatch(clearError())
+        }
+
+        dispatch(jobById(id))
+
+    }, [id, error, dispatch])
+
     useEffect(() => {
         window.scrollTo(0, 0)
-    })
+    }, [])
+
+    if (loading) {
+        return (
+            <Flex w="100vw" h="60vh" alignItems="center" justifyContent="center">
+                <Spinner size="xl" />
+            </Flex>
+        );
+    }
     return (
         <>
             <Box p={8}>
@@ -25,6 +71,7 @@ const JobDetailPage = () => {
                         : "rgba(255, 255, 255, 0.2) 0px 3px 8px"
                     }
                     borderRadius={"4px"}
+                    bg={colorMode === "dark" ? "" : "#ffffff"}
                 >
                     <Flex mt={5} alignItems={"center"} justifyContent={"space-between"} px={8}>
                         <Box>
@@ -35,12 +82,12 @@ const JobDetailPage = () => {
                                         fontWeight={"bold"}
                                         fontSize={"md"}
                                         fontFamily={"sans-serif"}
-                                    >Job Title</Text>
+                                    >{job && job.title}</Text>
                                     <Text
                                         fontSize={"sm"}
                                         fontFamily={"sans-serif"}
-                                        color={"#c7c7c7"}
-                                    >Job Holder</Text>
+                                        color={colorMode === "dark" ? "#c7c7c7" : "#171923"}
+                                    >{job && job.comapanyId?.name}</Text>
                                 </Box>
                             </Flex>
                         </Box>
@@ -52,38 +99,60 @@ const JobDetailPage = () => {
                     </Flex>
                     <Box px={12} mt={8}>
                         <Flex alignItems={"center"} gap={3} mb={2}>
-                            <IoLocation fontSize={"20px"} />
-                            <Text>Vemali Village, Vadodara</Text>
+                            <IoLocation fontSize={"20px"} color={"#48bb78"} />
+                            <Text>{job && job.location}</Text>
                         </Flex>
                         <Flex alignItems={"center"} gap={3} mb={2}>
-                            <FaMoneyCheckDollar fontSize={"20px"} />
-                            <Text>₹13,800 - ₹28,000 monthly*</Text>
+                            <FaMoneyCheckDollar fontSize={"20px"} color={"#48bb78"} />
+                            <Text>
+                                ₹{
+                                    job && Math.round(job.salary / 12 - 20000)
+                                } - ₹{job && Math.round(job.salary / 12)} monthly*
+                            </Text>
                         </Flex>
                         <Flex alignItems={"center"} gap={3} mb={2}>
-                            <MdDateRange fontSize={"20px"} />
-                            <Text><b style={{ color: "#c7c7c7" }}>Posted date: </b>24-08-24</Text>
+                            <MdDateRange fontSize={"20px"} color={"#48bb78"} />
+                            <Text><b style={{
+                                color: colorMode === "dark" ? "#c7c7c7" : "#171923"
+                            }}>Posted date: </b>
+                                {
+                                    job &&
+                                    job.createdAt.substring(0, 10)
+                                        .split("-")
+                                        .reverse()
+                                        .join('-')
+                                }
+                            </Text>
+                        </Flex>
+                        <Flex alignItems={"center"} gap={3} mb={3} >
+                            <MdNoteAlt fontSize={"20px"} color={"#48bb78"} />
+                            <Text width={"50%"} noOfLines={3} size={"sm"}><b style={{
+                                color: colorMode === "dark" ? "#c7c7c7" : "#171923"
+                            }}>Description: </b>
+                                {job && job.description}
+                            </Text>
                         </Flex>
                         <Flex alignItems={"center"} gap={3} mb={2}>
-                            <MdNoteAlt fontSize={"20px"} />
-                            <Text size={"sm"}><b style={{ color: "#c7c7c7" }}>Description: </b>
-                                Lorem ipsum dolor sit amet consectetur adipisicing elit. Ad, fuga.</Text>
-                        </Flex>
-                        <Flex alignItems={"center"} gap={3} mb={2}>
-                            <LuFileType fontSize={"20px"} />
-                            <Text><b style={{ color: "#c7c7c7" }}>Job Type: </b>
+                            <LuFileType fontSize={"20px"} color={"#48bb78"} />
+                            <Text><b style={{
+                                color: colorMode === "dark" ? "#c7c7c7" : "#171923"
+                            }}>Job Type: </b>
                                 <span style={{
                                     background: `${colorMode === "dark" ? "#171923" : "#ffffff"}`,
-                                    padding:"4px 12px",
-                                    borderRadius:"4px"
+                                    padding: "4px 12px",
+                                    borderRadius: "4px",
+                                    backgroundColor: colorMode === "dark" ? "#171923" : "#edf2f7"
                                 }}>
-                                    Part Time
+                                    {job && job.jobType}
                                 </span>
                             </Text>
                         </Flex>
                     </Box>
-                    <Box px={12} mt={8}>
-                        <Box bg={"#171923"} color={"#c7c7c7"} p={10}
+                    <Box px={12} mt={8} >
+                        <Box bg={colorMode === "dark" ? "#171923" : "#edf2f7"}
+                            color={colorMode === "dark" ? "#c7c7c7" : "#171923"} p={10}
                             borderRadius={"8px"}
+                            boxShadow={colorMode === "light" && "rgba(149, 157, 165, 0.2) 0px 8px 24px"}
                         >
                             <Flex
                                 alignItems={"center"}
@@ -93,223 +162,217 @@ const JobDetailPage = () => {
                             >
                                 <Box>
                                     <Text size={"xs"}>Fixed</Text>
-                                    <Heading size={"xs"}>₹13800 - ₹25000</Heading>
+                                    <Heading size={"xs"}>
+                                        ₹{
+                                            job && Math.round(job.salary / 12 - 20000)
+                                        } - ₹{job && Math.round(job.salary / 12)}
+                                    </Heading>
                                 </Box>
                                 <Box>
-                                    <Text size={"xs"}>Fixed</Text>
-                                    <Heading size={"xs"}>₹13800 - ₹25000</Heading>
+                                    <Text size={"xs"}>Average Incentives*</Text>
+                                    <Heading size={"xs"}>
+                                        ₹{(job && Math.round(job.salary / 100 * 1))}
+                                    </Heading>
                                 </Box>
                                 <Box>
-                                    <Text size={"xs"}>Fixed</Text>
-                                    <Heading size={"xs"}>₹13800 - ₹25000</Heading>
+                                    <Text size={"xs"}>Earning Potential</Text>
+                                    <Heading size={"xs"}>
+                                        ₹{
+                                            (job && Math.round(job.salary / 12)) + ((job && Math.round(job.salary / 100) * 1))
+                                        }
+                                    </Heading>
                                 </Box>
                             </Flex>
-                            <Divider mb={3} />
+                            <Divider mb={3} borderColor={colorMode === "dark" ? "#c7c7c7" : "#8c8594"} />
                             <Flex alignItems={"center"} gap={2}>
                                 <RiErrorWarningFill />
                                 <Text
-                                    size={"xs"} color={"#c7c7c7"}
+                                    size={"xs"} color={colorMode === "dark" ? "#c7c7c7" : "#171923"}
                                 >You can earn more incentive if you perform well</Text>
                             </Flex>
                         </Box>
                     </Box>
 
                     <Box px={12} mt={8} mb={4}>
-                        <Box bg={"#171923"} color={"#c7c7c7"} p={5}
+                        <Box bg={colorMode === "dark" ? "#171923" : "#edf2f7"}
+                            color={colorMode === "dark" ? "#c7c7c7" : "#171923"} p={5}
                             borderRadius={"8px"}
+                            boxShadow={colorMode === "light" && "rgba(149, 157, 165, 0.2) 0px 8px 24px"}
                         >
                             <Heading size={"sm"} mb={2}>Job highlights</Heading>
                             <Flex alignItems={"center"} gap={2} >
                                 <FaPeopleGroup fontSize={"20px"} color={"#48bb78"} />
-                                <Text>55 Applicants</Text>
+                                <Text>{job && job?.position} Applicants/Position</Text>
                             </Flex>
                         </Box>
                     </Box>
-                    <Divider></Divider>
+                    <Divider borderColor={colorMode === "dark" ? "#c7c7c7" : "#8c8594"}></Divider>
                     <Box px={12} mt={8} mb={4} display={"flex"} flexDirection={"column"} gap={8}>
                         <Heading size={"sm"}>Job role</Heading>
                         <Box>
-                            <Flex alignItems={"center"} maxW={"620px"}>
+                            <Grid
+                                templateColumns='repeat(2, 1fr)'
+                                gap={2} maxW={"620px"}
+                                alignItems={"center"}
+                            >
                                 <Box>
                                     <Flex alignItems={"center"} gap={2}>
-                                        <FaBuilding />
+                                        <FaBuilding color={"#48bb78"} />
                                         <Text
-                                            color={"#c7c7c7"}
+                                            color={colorMode === "dark" ? "#c7c7c7" : "#8c8594"}
                                             size={"xs"}
                                         >Work location</Text>
                                     </Flex>
                                     <Text ml={5}>
-                                        S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
+                                        {job && job.location} India
                                     </Text>
                                 </Box>
                                 <Box>
                                     <Flex alignItems={"center"} gap={2}>
-                                        <FaBuilding />
+                                        <IoDocumentTextSharp color={"#48bb78"} />
                                         <Text
-                                            color={"#c7c7c7"}
+                                            color={colorMode === "dark" ? "#c7c7c7" : "#171923"}
                                             size={"xs"}
-                                        >Work location</Text>
+                                        >Department</Text>
                                     </Flex>
                                     <Text ml={5}>
-                                        S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
+                                        Tech / {job && job.title}
                                     </Text>
                                 </Box>
-                            </Flex>
+                            </Grid>
                         </Box>
                         <Box>
-                            <Flex alignItems={"center"} maxW={"620px"}>
+                            <Grid templateColumns='repeat(2, 1fr)'
+                                gap={2} maxW={"620px"}
+                                alignItems={"center"}>
                                 <Box>
                                     <Flex alignItems={"center"} gap={2}>
-                                        <FaBuilding />
+                                        <PiCertificateLight color={"#48bb78"} />
                                         <Text
-                                            color={"#c7c7c7"}
+                                            color={colorMode === "dark" ? "#c7c7c7" : "#171923"}
                                             size={"xs"}
-                                        >Work location</Text>
+                                        >Category</Text>
                                     </Flex>
                                     <Text ml={5}>
-                                        S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
+                                        {job && job.title}
                                     </Text>
                                 </Box>
                                 <Box>
                                     <Flex alignItems={"center"} gap={2}>
-                                        <FaBuilding />
+                                        <IoTimeSharp color={"#48bb78"} />
                                         <Text
-                                            color={"#c7c7c7"}
+                                            color={colorMode === "dark" ? "#c7c7c7" : "#171923"}
                                             size={"xs"}
-                                        >Work location</Text>
+                                        >Employment Time</Text>
                                     </Flex>
                                     <Text ml={5}>
-                                        S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
+                                        {job && job.jobType}
                                     </Text>
                                 </Box>
-                            </Flex>
+                            </Grid>
                         </Box>
                         <Box>
-                            <Flex alignItems={"center"} maxW={"620px"}>
+                            <Grid templateColumns='repeat(2, 1fr)'
+                                gap={2} maxW={"620px"}
+                                alignItems={"center"}>
                                 <Box>
                                     <Flex alignItems={"center"} gap={2}>
-                                        <FaBuilding />
+                                        <FaSun color={"#48bb78"} />
                                         <Text
-                                            color={"#c7c7c7"}
+                                            color={colorMode === "dark" ? "#c7c7c7" : "#171923"}
                                             size={"xs"}
-                                        >Work location</Text>
+                                        >Shift</Text>
                                     </Flex>
                                     <Text ml={5}>
-                                        S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
+                                        {"Day Shift"}
                                     </Text>
                                 </Box>
-                            </Flex>
+                            </Grid>
                         </Box>
                     </Box>
-                    <Divider></Divider>
+                    <Divider borderColor={colorMode === "dark" ? "#c7c7c7" : "#8c8594"}></Divider>
                     <Box px={12} mt={8} mb={4} display={"flex"} flexDirection={"column"} gap={8}>
                         <Heading size={"sm"}>Job requirements</Heading>
-                        <Box>
-                            <Flex alignItems={"center"} maxW={"620px"}>
-                                <Box>
-                                    <Flex alignItems={"center"} gap={2}>
-                                        <FaBuilding />
-                                        <Text
-                                            color={"#c7c7c7"}
-                                            size={"xs"}
-                                        >Work location</Text>
-                                    </Flex>
-                                    <Text ml={5}>
-                                        S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
-                                    </Text>
-                                </Box>
-                                <Box>
-                                    <Flex alignItems={"center"} gap={2}>
-                                        <FaBuilding />
-                                        <Text
-                                            color={"#c7c7c7"}
-                                            size={"xs"}
-                                        >Work location</Text>
-                                    </Flex>
-                                    <Text ml={5}>
-                                        S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
-                                    </Text>
-                                </Box>
-                            </Flex>
-                        </Box>
-                        <Box>
-                            <Flex alignItems={"center"} maxW={"620px"}>
-                                <Box>
-                                    <Flex alignItems={"center"} gap={2}>
-                                        <FaBuilding />
-                                        <Text
-                                            color={"#c7c7c7"}
-                                            size={"xs"}
-                                        >Work location</Text>
-                                    </Flex>
-                                    <Text ml={5}>
-                                        S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
-                                    </Text>
-                                </Box>
-                                <Box>
-                                    <Flex alignItems={"center"} gap={2}>
-                                        <FaBuilding />
-                                        <Text
-                                            color={"#c7c7c7"}
-                                            size={"xs"}
-                                        >Work location</Text>
-                                    </Flex>
-                                    <Text ml={5}>
-                                        S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
-                                    </Text>
-                                </Box>
-                            </Flex>
-                        </Box>
-                        <Box>
-                            <Flex alignItems={"center"} maxW={"620px"}>
-                                <Box>
-                                    <Flex alignItems={"center"} gap={2}>
-                                        <FaBuilding />
-                                        <Text
-                                            color={"#c7c7c7"}
-                                            size={"xs"}
-                                        >Work location</Text>
-                                    </Flex>
-                                    <Text ml={5}>
-                                        S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
-                                    </Text>
-                                </Box>
-                            </Flex>
-                        </Box>
+                        <Grid templateColumns='repeat(2, 1fr)'
+                            gap={2} maxW={"620px"}
+                            alignItems={"center"}
+                            rowGap={6}
+                        >
+
+                            {
+                                requirementsHead.map((requirement) => {
+                                    return (
+                                        <Box>
+                                            <Flex alignItems={"center"} gap={2}>
+                                                {requirement.icon}
+                                                <Text
+                                                    color={colorMode === "dark" ? "#c7c7c7" : "#8c8594"}
+                                                    size={"xs"}
+                                                >{requirement.tag}</Text>
+                                            </Flex>
+                                            <Text ml={5}>
+                                                {requirement.text}
+                                            </Text>
+                                        </Box>
+                                    )
+                                })
+                            }
+                            <Box>
+                                <Flex alignItems={"center"} gap={2}>
+                                    <FaPencilAlt color={"#48bb78"} />
+                                    <Text
+                                        color={colorMode === "dark" ? "#c7c7c7" : "#8c8594"}
+                                        size={"xs"}
+                                    >Skills</Text>
+                                </Flex>
+                                <Text ml={5}>
+                                    {
+                                        job && job.requirements?.length > 0 &&
+                                        job.requirements.map((requirement) => {
+                                            return (
+                                                <>
+                                                    {requirement},
+                                                </>
+                                            )
+                                        })
+                                    }
+                                </Text>
+                            </Box>
+                        </Grid>
                     </Box>
-                    <Divider></Divider>
+                    <Divider borderColor={colorMode === "dark" ? "#c7c7c7" : "#8c8594"}></Divider>
                     <Box px={12} mt={8} mb={4} display={"flex"} flexDirection={"column"} gap={8}>
                         <Heading size={"sm"}>About company</Heading>
                         <Box>
                             <Flex alignItems={"center"} gap={2}>
-                                <FaBuilding />
+                                <FaUser color={"#48bb78"} />
                                 <Text
-                                    color={"#c7c7c7"}
+                                    color={colorMode === "dark" ? "#c7c7c7" : "#8c8594"}
                                     size={"xs"}
                                 >
                                     Name</Text>
                             </Flex>
                             <Text ml={5}>
-                                Lakshminarayan Fincorp
+                                {job && job.comapanyId?.name}
                             </Text>
                         </Box>
                         <Box>
                             <Flex alignItems={"center"} gap={2}>
-                                <FaBuilding />
+                                <FaRegAddressBook color={"#48bb78"} />
                                 <Text
-                                    color={"#c7c7c7"}
+                                    color={colorMode === "dark" ? "#c7c7c7" : "#8c8594"}
                                     size={"xs"}
                                 >Address</Text>
                             </Flex>
                             <Text ml={5}>
-                                S9 square, Sama-Savli Road, Vemali, Vadodara, Gujarat, India
+                                {job && job.comapanyId?.location}
                             </Text>
                         </Box>
                     </Box>
-                    <Divider></Divider>
+                    <Divider borderColor={colorMode === "dark" ? "#c7c7c7" : "#8c8594"}></Divider>
                     <Flex width={"100%"} alignItems={"center"} justifyContent={"center"} gap={1} p={4}>
-                        <Text color={"#c7c7c7"}>Job posted by</Text>
-                        <Heading size={"xs"}>Lakshminarayan Fincorp</Heading>
+                        <Text color={colorMode === "dark" ? "#c7c7c7" : "#8c8594"}>Job posted by</Text>
+                        <Heading size={"xs"}>{job && job.comapanyId?.name}</Heading>
                     </Flex>
                 </Box>
             </Box>

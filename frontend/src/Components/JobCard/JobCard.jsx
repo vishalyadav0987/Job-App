@@ -37,7 +37,7 @@ const JobCard = ({ pathName, job }) => {
                                 }
                                 <Box>
                                     <Heading size='sm'>{job && job?.comapanyId?.name}</Heading>
-                                    <Text color={"#c5c5c5"}>{job && job?.comapanyId?.location}</Text>
+                                    <Text color={"#8c8594"}>{job && job?.comapanyId?.location}</Text>
                                 </Box>
                             </Flex>
                             {
@@ -55,7 +55,7 @@ const JobCard = ({ pathName, job }) => {
                         <Flex justifyContent={"space-between"} alignItems={"center"} mb={2}>
                             <Heading size='sm'>{job && job?.title}</Heading>
                             {
-                                !pathName && <Text size={"xs"} color={"#c5c5c5"}>2 days ago</Text>
+                                !pathName && <Text size={"xs"} color={"#8c8594"}>2 days ago</Text>
                             }
                         </Flex>
                         <Text>
