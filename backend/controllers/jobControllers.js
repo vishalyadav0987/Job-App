@@ -55,31 +55,79 @@ const postJob = async (req, res) => {
 
 
 // GET ALL JOB FOR STUDENTS
+// const getAllJobs = async (req, res) => {
+//     try {
+//         const keyword = req.query.keyword || "";
+//         const query = {
+//             $or: [
+//                 { title: { $regex: keyword, $options: "i" } },
+//                 { description: { $regex: keyword, $options: "i" } },
+//             ]
+//         }
+
+//         const jobs = await JobSchema.find(query).populate({
+//             path: "comapanyId",
+//         }).sort({ createdAt: -1 })
+
+//         if (!jobs) {
+//             return res.json({
+//                 success: false,
+//                 message: "No found job with this keyword.",
+//             });
+//         }
+
+//         res.json({
+//             success: true,
+//             data: jobs,
+//         })
+//     } catch (error) {
+//         console.log("Error in getAllJobs function -> ", error.message);
+//         res.json({
+//             success: false,
+//             message: error.message,
+//         });
+//     }
+// }
+
 const getAllJobs = async (req, res) => {
     try {
         const keyword = req.query.keyword || "";
+        const title = req.query.title || "";
+        const location = req.query.location || "";
+        const salaryGte = req.query.salaryGte;
+        const salaryLte = req.query.salaryLte;
+
+        // Constructing the query object
         const query = {
             $or: [
                 { title: { $regex: keyword, $options: "i" } },
                 { description: { $regex: keyword, $options: "i" } },
             ]
+        };
+
+        if (title) {
+            query.title = { $regex: title, $options: "i" };
         }
 
-        const jobs = await JobSchema.find(query).populate({
-            path: "comapanyId",
-        }).sort({ createdAt: -1 })
-
-        if (!jobs) {
-            return res.json({
-                success: false,
-                message: "No found job with this keyword.",
-            });
+        if (location) {
+            query.location = { $regex: location, $options: "i" };
         }
+
+        if (salaryGte || salaryLte) {
+            query.salary = {};
+            if (salaryGte) query.salary.$gte = salaryGte;
+            if (salaryLte) query.salary.$lte = salaryLte;
+        }
+
+        // Fetching jobs based on the query
+        const jobs = await JobSchema.find(query)
+            .populate("comapanyId")
+            .sort({ createdAt: -1 });
 
         res.json({
             success: true,
             data: jobs,
-        })
+        });
     } catch (error) {
         console.log("Error in getAllJobs function -> ", error.message);
         res.json({
@@ -87,7 +135,9 @@ const getAllJobs = async (req, res) => {
             message: error.message,
         });
     }
-}
+};
+
+
 
 
 // GET JOB FOR STUDENTS
