@@ -1,4 +1,4 @@
-import { CLEAR_ERRORS, GET_ALL_APPLICATION_OF_APPLICANT_FAIL, GET_ALL_APPLICATION_OF_APPLICANT_REQUEST, GET_ALL_APPLICATION_OF_APPLICANT_SUCEESS, GET_ALL_APPLICATION_ON_JOB_FAIL, GET_ALL_APPLICATION_ON_JOB_REQUEST, GET_ALL_APPLICATION_ON_JOB_SUCEESS } from "../constants/applicationConstant";
+import { CLEAR_ERRORS, GET_ALL_APPLICATION_OF_APPLICANT_FAIL, GET_ALL_APPLICATION_OF_APPLICANT_REQUEST, GET_ALL_APPLICATION_OF_APPLICANT_SUCEESS, GET_ALL_APPLICATION_ON_JOB_FAIL, GET_ALL_APPLICATION_ON_JOB_REQUEST, GET_ALL_APPLICATION_ON_JOB_SUCEESS, UPDATE_JOB_STATUS_FAIL, UPDATE_JOB_STATUS_REQUEST, UPDATE_JOB_STATUS_RESET, UPDATE_JOB_STATUS_SUCEESS } from "../constants/applicationConstant";
 
 const applicationReducer = (state = { applications: [] }, action) => {
     switch (action.type) {
@@ -31,5 +31,45 @@ const applicationReducer = (state = { applications: [] }, action) => {
 }
 
 
+const updateJobStatusReducer = (state = {}, action) => {
+    switch (action.type) {
+        case UPDATE_JOB_STATUS_REQUEST:
+            return {
+                ...state,
+                loading: true,
+            }
+        case UPDATE_JOB_STATUS_SUCEESS:
+            return {
+                ...state,
+                loading: false,
+                isUpdated: action.payload.success,
+                message: action.payload.message
+            }
 
-export { applicationReducer };
+        case UPDATE_JOB_STATUS_FAIL:
+            return {
+                ...state,
+                loading: false,
+                error: action.payload
+            }
+        case UPDATE_JOB_STATUS_RESET:
+            return {
+                ...state,
+                isUpdated: false
+            }
+
+
+        case CLEAR_ERRORS:
+            return {
+                error: null,
+                ...state,
+            }
+
+
+        default:
+            return state;
+    }
+}
+
+
+export { applicationReducer, updateJobStatusReducer };
