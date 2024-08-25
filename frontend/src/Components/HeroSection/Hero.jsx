@@ -14,8 +14,20 @@ import {
 } from '@chakra-ui/react'
 import { FiSearch } from "react-icons/fi";
 import CourselCategory from '../CourselCategory/CourselCategory'
+import { useState } from 'react';
+import { useDispatch } from 'react-redux'
+import { setSession } from '../../redux/actions/jobActions';
+import { useNavigate } from 'react-router-dom';
 
 export default function Hero() {
+    const navigate = useNavigate();
+    const [query, setQuery] = useState("");
+    const dispatch = useDispatch();
+    const handleSetQuery = (query) => {
+        dispatch(setSession(query));
+        navigate('/query/job');
+    }
+
     return (
         <>
             <Container maxW={'3xl'}>
@@ -30,7 +42,7 @@ export default function Hero() {
                         lineHeight={'110%'}>
                         Make money from get<br />
                         <Text as={'span'} color={'green.400'}>
-                           Dream Job
+                            Dream Job
                         </Text>
                     </Heading>
                     <Text color={'gray.500'}>
@@ -45,10 +57,14 @@ export default function Hero() {
                             type='text'
                             placeholder='Search Job'
                             boxShadow={"rgba(99, 99, 99, 0.3) 0px 2px 8px 0px"}
+                            onChange={(e) => setQuery(e.target.value)}
+                            value={query}
                         />
                         <InputRightElement width='4.5rem'>
                             <Button h='1.75rem' size='sm' >
-                                <FiSearch fontSize={"16px"} />
+                                <FiSearch fontSize={"16px"} onClick={() => {
+                                    handleSetQuery(query)
+                                }} />
                             </Button>
                         </InputRightElement>
                     </InputGroup>
@@ -58,7 +74,7 @@ export default function Hero() {
                         align={'center'}
                         alignSelf={'center'}
                         position={'relative'}>
-                        <CourselCategory />
+                        <CourselCategory handleSetQuery={handleSetQuery}/>
 
                     </Stack>
                 </Stack>
