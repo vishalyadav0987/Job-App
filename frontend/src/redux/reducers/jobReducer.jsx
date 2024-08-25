@@ -1,5 +1,5 @@
 import React from 'react'
-import { GET_ALL_JOB_FAIL, GET_ALL_JOB_PRESENT_ADMIN_FAIL, GET_ALL_JOB_PRESENT_ADMIN_REQUEST, GET_ALL_JOB_PRESENT_ADMIN_SUCEESS, GET_ALL_JOB_REQUEST, GET_ALL_JOB_SUCEESS, POST_NEW_JOB_FAIL, POST_NEW_JOB_REQUEST, POST_NEW_JOB_RESET, POST_NEW_JOB_SUCEESS, SINGLE_JOB_DETAILS_FAIL, SINGLE_JOB_DETAILS_REQUEST, SINGLE_JOB_DETAILS_SUCEESS, UPDATE_JOB_DETIALS_FAIL, UPDATE_JOB_DETIALS_REQUEST, UPDATE_JOB_DETIALS_RESET, UPDATE_JOB_DETIALS_SUCEESS } from '../constants/jobConstants';
+import { GET_ALL_JOB_FAIL, GET_ALL_JOB_PRESENT_ADMIN_FAIL, GET_ALL_JOB_PRESENT_ADMIN_REQUEST, GET_ALL_JOB_PRESENT_ADMIN_SUCEESS, GET_ALL_JOB_REQUEST, GET_ALL_JOB_SUCEESS, POST_NEW_JOB_FAIL, POST_NEW_JOB_REQUEST, POST_NEW_JOB_RESET, POST_NEW_JOB_SUCEESS, SET_SESSION, SINGLE_JOB_DETAILS_FAIL, SINGLE_JOB_DETAILS_REQUEST, SINGLE_JOB_DETAILS_SUCEESS, UPDATE_JOB_DETIALS_FAIL, UPDATE_JOB_DETIALS_REQUEST, UPDATE_JOB_DETIALS_RESET, UPDATE_JOB_DETIALS_SUCEESS } from '../constants/jobConstants';
 import { CLEAR_ERRORS } from '../constants/userConstants';
 
 const jobReducer = (state = { Job: {} }, action) => {
@@ -115,4 +115,21 @@ const updateJobDetaailsReducer = (state = {}, action) => {
     }
 }
 
-export { jobReducer, getAllJobs, updateJobDetaailsReducer }
+
+const initialState = {
+    searchQueryuery: null,
+};
+
+const sessionReducer = (state = initialState, action) => {
+    switch (action.type) {
+        case SET_SESSION:
+            return {
+                ...state,
+                searchQueryuery: action.payload,
+            };
+        default:
+            return state;
+    }
+};
+
+export { jobReducer, getAllJobs, updateJobDetaailsReducer, sessionReducer }
