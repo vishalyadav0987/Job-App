@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     Table,
     Thead,
@@ -36,6 +36,9 @@ import { clearErrors, getALLCompany } from '../../../redux/actions/companyAction
 const Compines = () => {
     const dispatch = useDispatch()
     const { companies, error, loading } = useSelector(state => state.getAllCompany);
+    const [filteredCompany, setFilteredCompany] = useState([]);
+    const [searchVal, setSearchVal] = useState("");
+
 
     useEffect(() => {
         if (error) {
@@ -45,9 +48,24 @@ const Compines = () => {
         dispatch(getALLCompany());
     }, [error, dispatch]);
 
+
+
+    useEffect(() => {
+        const filterCompany = companies && companies?.length > 0 &&
+            companies.filter((company) => {
+                if (!searchVal) {
+                    return true
+                };
+                return company?.name?.toLowerCase().includes(searchVal.toLowerCase());
+
+            });
+        setFilteredCompany(filterCompany);
+
+    }, [searchVal, companies])
+
     useEffect(() => {
         window.scrollTo(0, 0);
-    })
+    }, [])
 
     if (loading) {
         return (
@@ -67,7 +85,10 @@ const Compines = () => {
                             <Input
                                 focusBorderColor='#48bb78'
                                 placeholder='search by name'
-                                size='md' />
+                                size='md'
+                                onChange={(e) => setSearchVal(e.target.value)}
+                                value={searchVal}
+                            />
                         </Stack>
                         <Link to={"/admin/company/create"}>
                             <Button
@@ -91,11 +112,11 @@ const Compines = () => {
                             </Thead>
                             <Tbody>
                                 {
-                                    companies && companies?.length > 0 &&
-                                    companies.map((company) => {
+                                    filteredCompany && filteredCompany?.length > 0 &&
+                                    filteredCompany?.map((company) => {
                                         return (
                                             <>
-                                                <Tr borderBottom="1px solid #3c3c3c">
+                                                <Tr borderBottom="1px solid #3c3c3c" key={company?._id}>
                                                     <Td>
                                                         <Avatar src={companies && company.logoImg} />
                                                     </Td>
