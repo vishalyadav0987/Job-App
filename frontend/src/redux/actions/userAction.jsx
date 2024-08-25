@@ -1,5 +1,8 @@
 import axios from 'axios';
 import {
+    APPLY_FOR_JOB_FAIL,
+    APPLY_FOR_JOB_REQUEST,
+    APPLY_FOR_JOB_SUCCESS,
     CLEAR_ERRORS,
     LOAD_USER_FAIL,
     LOAD_USER_REQUEST,
@@ -173,9 +176,39 @@ const updateProfile = (userData) => async (dispatch) => {
     }
 }
 
+
+// APLLY FOR JOB
+const applyJob = (jobId) => async (dispatch) => {
+    try {
+        dispatch({ type: APPLY_FOR_JOB_REQUEST });
+        const response = await axios.post(
+            `/api/v1/application/apply/${jobId}`
+        );
+        if (response.data.success) {
+            dispatch({
+                type: APPLY_FOR_JOB_SUCCESS,
+                payload: response.data,
+            });
+        }
+        else {
+            dispatch({
+                type: APPLY_FOR_JOB_FAIL,
+                payload: response.data.message,
+            })
+        }
+    } catch (error) {
+        dispatch({
+            type: APPLY_FOR_JOB_FAIL,
+            payload: error.response && error.response.data.message
+                ? error.response.data.message
+                : error.message,
+        });
+    }
+}
+
 // clearing Error
 const clearError = () => async (dispatch) => {
     dispatch({ type: CLEAR_ERRORS });
 }
 
-export { register, login, loadUser, logout, updateProfile, clearError };
+export { register, login, loadUser, logout, updateProfile, applyJob, clearError };
