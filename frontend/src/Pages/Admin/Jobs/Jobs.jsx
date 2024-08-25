@@ -127,7 +127,7 @@ const Jobs = () => {
                                                                             </Flex>
                                                                         </Link>
                                                                         <Divider mb={2} mt={2}></Divider>
-                                                                        <Link to={`/admin/job/1/applicants`}>
+                                                                        <Link to={`/admin/job/${job?._id}/applicants`}>
                                                                             <Flex alignItems={"center"} gap={2}>
                                                                                 <BsEye />
                                                                                 <Text>Applicants</Text>
