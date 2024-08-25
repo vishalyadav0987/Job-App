@@ -22,6 +22,7 @@ import EditJobDetails from './Pages/EditJobDetails/EditJobDetails';
 import ProtectedRoute from './Utils/ProtectedRoute';
 import { useSelector } from 'react-redux';
 import NotFound from './Pages/NotFound/NotFound';
+import QueryJob from './Pages/QueryJob/QueryJob';
 
 const App = () => {
   const loaction = useLocation();
@@ -55,6 +56,7 @@ const App = () => {
           <Route path={`/jobs/:keyword`} element={<JobPage />} />
           <Route path={`/jobs`} element={<JobPage />} />
           <Route path='/job/detail/:id' element={<JobDetailPage />} />
+          <Route path='/query/job' element={<QueryJob />} />
 
           <Route path='/profile/update' element={!isAuthenticated
             ? <Navigate to='/' /> : <UpdateProfile />
