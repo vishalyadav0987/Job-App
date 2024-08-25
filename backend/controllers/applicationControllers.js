@@ -131,7 +131,7 @@ const getAllApplicantOnJob = async (req, res) => {
             })
         };
         res.status(200).json({
-            succees: true,
+            success: true,
             data: applicants,
         });
     } catch (error) {
