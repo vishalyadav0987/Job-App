@@ -5,8 +5,8 @@ const protectedRoute = require('../middleware/protectedRoute')
 
 
 router.route('/post').post(protectedRoute, postJob)
-router.route('/get').get(protectedRoute, getAllJobs);
-router.route('/get/:id').get(protectedRoute, getJobById);
+router.route('/get').get(getAllJobs);
+router.route('/get/:id').get(getJobById);
 router.route('/getall').get(protectedRoute, getAllJobsOfAdmin);
 router.route('/update/:id').put(protectedRoute, updateJob);
 
