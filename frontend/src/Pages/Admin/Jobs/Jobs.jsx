@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     Table,
     Thead,
@@ -34,6 +34,8 @@ import { clearError, getAllJobsOfAdmin } from '../../../redux/actions/jobActions
 const Jobs = () => {
     const dispatch = useDispatch();
     const { loading, error, jobs } = useSelector(state => state.adminAllJobs);
+    const [filteredJob, setFilteredJob] = useState([]);
+    const [searchVal, setSearchVal] = useState("");
 
     useEffect(() => {
         if (error) {
@@ -44,13 +46,25 @@ const Jobs = () => {
     }, [error, dispatch]);
 
     useEffect(() => {
+        const filterJob = jobs && jobs?.length > 0 &&
+            jobs.filter((job) => {
+                if (!searchVal) {
+                    return true;
+                }
+                return job?.title?.toLowerCase().includes(searchVal.toLowerCase()) ||
+                    job?.comapanyId?.name?.toLowerCase().includes(searchVal.toLowerCase());
+            });
+        setFilteredJob(filterJob);
+    }, [searchVal, jobs])
+
+    useEffect(() => {
         window.scrollTo(0, 0);
-    })
+    }, [])
 
     if (loading) {
         return (
 
-            <Flex w={"100vw"} height={"40vh"} alignItems={"center"} justifyContent={"center"}>
+            <Flex w={"100vw"} height={"60vh"} alignItems={"center"} justifyContent={"center"}>
                 <Spinner size={"xl"} />
             </Flex>
 
@@ -66,7 +80,10 @@ const Jobs = () => {
                             <Input
                                 focusBorderColor='#48bb78'
                                 placeholder='search by company name & role'
-                                size='md' width={"400px"} />
+                                size='md' width={"400px"}
+                                onChange={(e) => setSearchVal(e.target.value)}
+                                value={searchVal}
+                            />
                         </Stack>
                         <Link to={"/admin/job/create"}>
                             <Button
@@ -82,16 +99,16 @@ const Jobs = () => {
                             <TableCaption>Imperial to metric conversion factors</TableCaption>
                             <Thead>
                                 <Tr borderBottom="2px solid #3c3c3c">
-                                    <Th>Company Name</Th>
                                     <Th>Role</Th>
+                                    <Th>Company Name</Th>
                                     <Th>Date</Th>
                                     <Th>Action</Th>
                                 </Tr>
                             </Thead>
                             <Tbody>
                                 {
-                                    jobs && jobs?.length > 0 &&
-                                    jobs.map((job) => {
+                                    filteredJob && filteredJob?.length > 0 &&
+                                    filteredJob?.map((job) => {
                                         return (
                                             <>
                                                 <Tr borderBottom="1px solid #3c3c3c">
