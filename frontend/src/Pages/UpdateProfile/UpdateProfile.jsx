@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Avatar, Box, Button, Flex, IconButton, Link, Text, useColorMode, useColorModeValue, useDisclosure } from '@chakra-ui/react'
+import { Avatar, Box, Button, Flex, IconButton, Link, Spinner, Text, useColorMode, useColorModeValue, useDisclosure } from '@chakra-ui/react'
 import { EditIcon, EmailIcon, PhoneIcon } from '@chakra-ui/icons';
 import ApplicationJobTable from '../../Components/ApplicationJobTable/ApplicationJobTable'
 import {
@@ -12,11 +12,8 @@ import {
     ModalCloseButton,
     FormControl,
     FormLabel,
-    Heading,
     Input,
     Stack,
-    HStack,
-    AvatarBadge,
     Center,
 } from '@chakra-ui/react'
 import { useDispatch, useSelector } from 'react-redux';
@@ -25,6 +22,7 @@ import { useNavigate } from 'react-router-dom'
 import useImagePreview from '../../CustomHook/useImagePreview'
 import { clearError, loadUser, updateProfile } from '../../redux/actions/userAction';
 import { UPDATE_PROFILE_RESET } from '../../redux/constants/userConstants';
+import { clearErrors, getApplicatonOfApplicant } from '../../redux/actions/applicationAction'
 
 const UpdateProfile = () => {
     const { isOpen, onOpen, onClose } = useDisclosure()
@@ -33,6 +31,11 @@ const UpdateProfile = () => {
     const dispatch = useDispatch();
     const { user } = useSelector(state => state.user);
     const { isUpdated, loading, error, message } = useSelector(state => state.updateProfile);
+    const {
+        loading: applicationLoading,
+        error: applicationError,
+        applications
+    } = useSelector(state => state.application);
 
     const [inputUpdateData, setInputUpdateData] = useState({
         fullname: user.fullname,
@@ -108,19 +111,18 @@ const UpdateProfile = () => {
                 type: UPDATE_PROFILE_RESET,
             })
         }
-    }, [dispatch, error, navigate, isUpdated]);
+        if (applicationError) {
+            toast.error(applicationError);
+            dispatch(clearErrors());
+        }
+        dispatch(getApplicatonOfApplicant());
+    }, [dispatch, error, navigate, isUpdated, applicationError]);
 
 
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
-
-
-
-
-
-
 
 
 
@@ -159,6 +161,7 @@ const UpdateProfile = () => {
                         ? "rgba(0, 0, 0, 0.24) 0px 3px 8px"
                         : "rgba(255, 255, 255, 0.2) 0px 3px 8px"
                     }
+                    bg={colorMode === "light" ? "white" : ""}
                 >
                     <Flex mt={5} alignItems={"center"} justifyContent={"space-between"} px={8}>
                         <Box>
@@ -207,14 +210,15 @@ const UpdateProfile = () => {
                         {
                             skillsHead2.map((skill, index) => {
                                 return (
-                                    <Flex gap={2}>
+                                    <Flex gap={2} key={index}>
                                         <Button bg={colorMode === "light"
-                                            ? "#ffffff" : "#3c3c3c"}>{skill} :</Button>
+                                            ? "#edf2f7" : "#3c3c3c"}>{skill} :</Button>
                                         <Flex gap={2} alignItems={"center"} key={index}>
                                             {
                                                 skillsHead3[index].map((s) => {
                                                     return (
                                                         <Box
+                                                            key={index}
                                                             border={colorMode === "dark"
                                                                 ? "1px solid white"
                                                                 : "1px solid black"
@@ -256,7 +260,11 @@ const UpdateProfile = () => {
                             fontFamily={"sans-serif"}
                             mb={3}
                         >Applied Job</Text>
-                        <ApplicationJobTable />
+                        {
+                            applicationLoading ? <Flex h={"20vh"} justifyContent={"center"} alignItems={"center"}>
+                                <Spinner size={"md"} />
+                            </Flex> : <ApplicationJobTable applications={applications} />
+                        }
                     </Box>
                 </Box>
             </Box>
