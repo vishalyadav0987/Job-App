@@ -36,7 +36,13 @@ const ApplicationJobTable = ({ applications }) => {
                                         <Td>{applications && application.jobId?.comapanyId?.name}</Td>
                                         <Td textAlign={"center"}><Button bg={colorMode === "light"
                                             ? "#edf2f7" : "#3c3c3c"} color={
-                                                application?.status === "pending" ? "#ff5733" : "#48bb78"
+                                                (application?.status === "pending"
+                                                    && "yellow") ||
+                                                (application?.status === "accepted"
+                                                    && "#48bb78") ||
+                                                (application?.status === "rejected"
+                                                    && "#ff5733")
+
                                             }
                                             >
                                             {applications && application.status}
