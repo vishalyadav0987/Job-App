@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import {
     Table,
     Thead,
@@ -32,7 +32,8 @@ import { FcAcceptDatabase } from "react-icons/fc";
 import toast from 'react-hot-toast';
 import { useSelector, useDispatch } from 'react-redux'
 import { useParams } from 'react-router-dom';
-import { clearErrors, getAllApplicantOnJob } from '../../../redux/actions/applicationAction';
+import { clearErrors, getAllApplicantOnJob, updateJobStatus } from '../../../redux/actions/applicationAction';
+import { UPDATE_JOB_STATUS_RESET } from '../../../redux/constants/applicationConstant';
 
 const Applicants = () => {
     const { colorMode } = useColorMode();
@@ -43,24 +44,33 @@ const Applicants = () => {
         error: applicationError,
         applications // not direction application array it job array in it application
     } = useSelector(state => state.application);
+    const { loading, error, isUpdated, message } = useSelector(state => state.updateJobStatus);
+    const [updatingId, setUpdatingId] = useState(null); // State to track the updating job
+
+
+    const handleChangeJobStatus = (value, applicationId) => {
+        console.log(value, applicationId);
+        setUpdatingId(applicationId);
+        dispatch(updateJobStatus(applicationId, value))
+    }
 
     useEffect(() => {
+        if (error) {
+            toast.error(error);
+            dispatch(clearErrors());
+        }
         if (applicationError) {
             toast.error(applicationError);
             dispatch(clearErrors());
         }
+        if (isUpdated) {
+            toast.success(message);
+            dispatch({ type: UPDATE_JOB_STATUS_RESET });
+        }
         dispatch(getAllApplicantOnJob(id));
-    }, [dispatch, applicationError, id]);
+    }, [dispatch, applicationError, id, error, isUpdated]);
 
-    if (applicationLoading) {
-        return (
 
-            <Flex w={"100vw"} height={"60vh"} alignItems={"center"} justifyContent={"center"}>
-                <Spinner size={"xl"} />
-            </Flex>
-
-        )
-    }
 
     return (
         <>
@@ -92,7 +102,7 @@ const Applicants = () => {
                                     applications && applications.applications?.length > 0 &&
                                     applications.applications?.map((application) => {
                                         return (
-                                            <Tr borderBottom="1px solid #3c3c3c">
+                                            <Tr borderBottom="1px solid #3c3c3c" key={application?._id}>
                                                 <Td>
                                                     {applications && application.applicantId?.fullname}
                                                 </Td>
@@ -137,7 +147,14 @@ const Applicants = () => {
                                                                     <Flex alignItems={"center"} gap={2}
                                                                         cursor={"pointer"}>
                                                                         <FcAcceptDatabase />
-                                                                        <Text>Accepted</Text>
+                                                                        <Text
+                                                                            w={"full"}
+                                                                            onClick={
+                                                                                (e) => {
+                                                                                    handleChangeJobStatus(e.target.innerText.toLowerCase(), application?._id)
+                                                                                }
+                                                                            }
+                                                                        >Accepted</Text>
                                                                     </Flex>
 
                                                                     <Divider mb={2} mt={2}></Divider>
@@ -145,7 +162,14 @@ const Applicants = () => {
                                                                     <Flex alignItems={"center"} gap={2}
                                                                         cursor={"pointer"}>
                                                                         <FcCancel />
-                                                                        <Text>Rejected</Text>
+                                                                        <Text
+                                                                            w={"full"}
+                                                                            onClick={
+                                                                                (e) => {
+                                                                                    handleChangeJobStatus(e.target.innerText.toLowerCase(), application?._id)
+                                                                                }
+                                                                            }
+                                                                        >Rejected</Text>
                                                                     </Flex>
 
                                                                 </Box>
@@ -154,10 +178,20 @@ const Applicants = () => {
                                                     </Popover>
                                                 </Td>
                                                 <Td textAlign={"center"}>
-                                                    <Button bg={colorMode === "light"
-                                                        ? "#edf2f7" : "#3c3c3c"} color={
-                                                            application?.status === "pending" ? "#ff5733" : "#48bb78"
-                                                        }
+                                                    <Button
+                                                        isLoading={
+                                                            loading && updatingId === application._id
+                                                        } // Only show loading for the correct button
+                                                        bg={colorMode === "light"
+                                                            ? "#edf2f7" : "#3c3c3c"} color={
+                                                                (application?.status === "pending"
+                                                                    && "yellow") ||
+                                                                (application?.status === "accepted"
+                                                                    && "#48bb78") ||
+                                                                (application?.status === "rejected"
+                                                                    && "#ff5733")
+
+                                                            }
                                                     >
                                                         {applications && application.status}
                                                     </Button>
