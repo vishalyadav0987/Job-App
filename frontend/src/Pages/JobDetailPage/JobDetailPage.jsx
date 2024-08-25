@@ -1,7 +1,7 @@
 import { EmailIcon, PhoneIcon } from '@chakra-ui/icons'
 import { Avatar, Box, Button, Divider, Flex, Grid, Heading, IconButton, Spinner, Text, useColorMode } from '@chakra-ui/react'
-import React, { useEffect } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import React, { useEffect, useState } from 'react'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { IoLocation } from "react-icons/io5";
 import { FaMoneyCheckDollar } from "react-icons/fa6";
 import { RiErrorWarningFill } from "react-icons/ri";
@@ -24,37 +24,74 @@ import { FaGraduationCap } from "react-icons/fa";
 import { FaPencilAlt } from "react-icons/fa";
 import { TbMessageLanguage } from "react-icons/tb";
 import { FaRegCalendarAlt } from "react-icons/fa";
+import { applyJob } from '../../redux/actions/userAction';
 
 const JobDetailPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const { colorMode } = useColorMode();
     const dispatch = useDispatch();
+    const { user, isAuthenticated } = useSelector(state => state.user);
     const { error, loading, job } = useSelector(state => state.newJob);
+    const isInitiallyApplied = job?.applications?.some(application => application.applicantId === user?._id) || false;
+    const [isApplied, setIsApplied] = useState(isInitiallyApplied);
+
+    const {
+        error: applyJobError,
+        loading: applyJobLoading,
+        success: isApply,
+        message,
+    } = useSelector(state => state.jobApplication);
+
+    const handleApplyForJob = async () => {
+        if (isAuthenticated === false && !user) {
+            navigate('/login', { state: { from: `/job/detail/${job?._id}` } });
+        }
+        else {
+            dispatch(applyJob(id))
+        }
+    };
 
     const requirementsHead = [
         { tag: "Experience need", icon: <PiSuitcaseSimpleFill color={"#48bb78"} />, text: `${job && job.experienceLevel} year*` },
         { tag: "Education", icon: <FaGraduationCap color={"#48bb78"} />, text: "Graduate" },
-        // { tag: "Skills", icon: <FaPencilAlt /> },
         { tag: "Role/category", icon: <PiCertificateLight color={"#48bb78"} />, text: `${job && job.title}` },
         { tag: "Hindi level", icon: <TbMessageLanguage color={"#48bb78"} />, text: "Hindi" },
         { tag: "Age limit", icon: <FaRegCalendarAlt color={"#48bb78"} />, text: "21 - 30 years" },
         { tag: "Gender", icon: <FaUser color={"#48bb78"} />, text: "M/F/T/O" },
-    ]
+    ];
 
     useEffect(() => {
         if (error) {
             toast.error(error);
-            dispatch(clearError())
+            dispatch(clearError());
+        }
+        if (applyJobError) {
+            toast.error(applyJobError);
+            dispatch(clearError());
+        }
+        if (isApply) {
+            setIsApplied(true);
+            toast.success(message);
         }
 
-        dispatch(jobById(id))
+        dispatch(jobById(id));
+    }, [id, error, dispatch, applyJobError, isApply]);
 
-    }, [id, error, dispatch])
+    // Initial isApplied state check based on job data
+    useEffect(() => {
+        if (job && user) {
+            const applied = job.applications.some(application => application.applicantId === user._id);
+            setIsApplied(applied);
+        }
+        else {
+            setIsApplied(false);
+        }
+    }, [job, user]);
 
     useEffect(() => {
-        window.scrollTo(0, 0)
-    }, [])
-
+        window.scrollTo(0, 0);
+    })
     if (loading) {
         return (
             <Flex w="100vw" h="60vh" alignItems="center" justifyContent="center">
@@ -92,9 +129,16 @@ const JobDetailPage = () => {
                             </Flex>
                         </Box>
                         <Box px={12} mt={8} mb={4} >
-                            <Button width={"100%"} bg={"#48bb78"} _hover={{
-                                bg: "#48bb89"
-                            }}>Apply For Job</Button>
+                            <Button
+                                isLoading={applyJobLoading}
+                                isDisabled={isApplied}
+                                width={"100%"} bg={"#48bb78"} _hover={{
+                                    bg: "#48bb89"
+                                }}
+                                onClick={isApplied ? null : handleApplyForJob}
+                            >
+                                {isApplied ? "Applied" : "Apply For Job"}
+                            </Button>
                         </Box>
                     </Flex>
                     <Box px={12} mt={8}>
