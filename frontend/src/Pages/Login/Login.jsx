@@ -21,7 +21,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux'
 import { useEffect, useState } from 'react'
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons';
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { clearError, login } from '../../redux/actions/userAction';
 import toast from 'react-hot-toast';
 import Cookies from 'js-cookie'
@@ -29,8 +29,9 @@ import Cookies from 'js-cookie'
 export default function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useDispatch();
-    const { error, loading, isAuthenticated, message,token } = useSelector((state) => state.user);
+    const { error, loading, isAuthenticated, message, token } = useSelector((state) => state.user);
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
     const [role, setRole] = useState("");
@@ -47,12 +48,13 @@ export default function Login() {
         }
         if (isAuthenticated) {
             Cookies.set('token', token); // लॉगिन के बाद कुकीज़ में टोकन सेट करें
-            navigate('/');
+            const redirectTo = location.state?.from || '/';
+            navigate(redirectTo);
         }
         if (message) {
             toast.success(message);
         }
-    }, [dispatch, error, message, isAuthenticated, navigate]);
+    }, [dispatch, error, message, isAuthenticated, navigate, location.state]);
 
     return (
         <Flex
@@ -83,7 +85,7 @@ export default function Login() {
 
                             <FormControl id="email" isRequired>
                                 <FormLabel>Email address</FormLabel>
-                                <Input type="email"
+                                <Input focusBorderColor='#48bb78' type="email"
                                     onChange={(e) => setEmail(e.target.value)}
                                     value={email}
                                 />
@@ -91,7 +93,7 @@ export default function Login() {
                             <FormControl id="password" isRequired>
                                 <FormLabel>Password</FormLabel>
                                 <InputGroup>
-                                    <Input type={showPassword ? 'text' : 'password'}
+                                    <Input focusBorderColor='#48bb78' type={showPassword ? 'text' : 'password'}
                                         onChange={(e) => setPassword(e.target.value)}
                                         value={password}
                                     />
@@ -107,7 +109,7 @@ export default function Login() {
                             <HStack>
                                 <FormControl isRequired>
                                     <FormLabel>Role</FormLabel>
-                                    <Select
+                                    <Select focusBorderColor='#48bb78'
                                         placeholder='Role'
                                         name="role"
                                         onChange={(e) => setRole(e.target.value)}

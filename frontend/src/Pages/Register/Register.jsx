@@ -100,7 +100,7 @@ export default function Register() {
                                 <Box>
                                     <FormControl id="firstName" isRequired>
                                         <FormLabel>Full Name</FormLabel>
-                                        <Input type="text"
+                                        <Input focusBorderColor='#48bb78' type="text"
                                             name="fullname"
                                             onChange={handleOnChange}
                                             value={inputs.fullname}
@@ -110,7 +110,7 @@ export default function Register() {
                                 <Box>
                                     <FormControl id="lastName" isRequired>
                                         <FormLabel>Phone Number</FormLabel>
-                                        <Input type="number"
+                                        <Input focusBorderColor='#48bb78' type="number"
                                             name="phoneNumber"
                                             onChange={handleOnChange}
                                             value={inputs.phoneNumber}
@@ -120,7 +120,7 @@ export default function Register() {
                             </HStack>
                             <FormControl id="email" isRequired>
                                 <FormLabel>Email address</FormLabel>
-                                <Input type="email"
+                                <Input focusBorderColor='#48bb78' type="email"
                                     name="email"
                                     onChange={handleOnChange}
                                     value={inputs.email}
@@ -129,7 +129,7 @@ export default function Register() {
                             <FormControl id="password" isRequired>
                                 <FormLabel>Password</FormLabel>
                                 <InputGroup>
-                                    <Input type={showPassword ? 'text' : 'password'}
+                                    <Input focusBorderColor='#48bb78' type={showPassword ? 'text' : 'password'}
                                         name="password"
                                         onChange={handleOnChange}
                                         value={inputs.password}
@@ -146,7 +146,7 @@ export default function Register() {
                             <HStack>
                                 <FormControl isRequired>
                                     <FormLabel>Role</FormLabel>
-                                    <Select
+                                    <Select focusBorderColor='#48bb78'
                                         placeholder='Role'
                                         name="role"
                                         onChange={(e) => handleOnChange(e)}
@@ -168,7 +168,7 @@ export default function Register() {
                                     <Center w="full">
                                         <Button w="full"
                                             onClick={() => imageRef.current.click()}>Change Icon</Button>
-                                        <Input type='file'
+                                        <Input focusBorderColor='#48bb78' type='file'
                                             onChange={handleImageOnChange}
                                             ref={imageRef}
                                             hidden
