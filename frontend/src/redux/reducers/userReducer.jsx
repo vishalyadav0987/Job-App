@@ -1,4 +1,7 @@
 import {
+    APPLY_FOR_JOB_FAIL,
+    APPLY_FOR_JOB_REQUEST,
+    APPLY_FOR_JOB_SUCCESS,
     CLEAR_ERRORS,
     LOAD_USER_FAIL,
     LOAD_USER_REQUEST,
@@ -126,4 +129,33 @@ const profileReducer = (state = {}, action) => {
     }
 }
 
-export { userReducer, profileReducer };
+const applyJobReducer = (state = {}, action) => {
+    switch (action.type) {
+        case APPLY_FOR_JOB_REQUEST:
+            return {
+                ...state,
+                loading: true,
+                error: null,
+            };
+        case APPLY_FOR_JOB_SUCCESS:
+            return {
+                ...state,
+                loading: false,
+                success: true,
+                message: action.payload.message,
+            };
+        case APPLY_FOR_JOB_FAIL:
+            return {
+                ...state,
+                loading: false,
+                success: false,
+                error: action.payload,
+            };
+        default:
+            return state;
+    }
+};
+
+
+
+export { userReducer, profileReducer, applyJobReducer };
