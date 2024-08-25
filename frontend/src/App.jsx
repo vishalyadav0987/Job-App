@@ -30,7 +30,7 @@ const App = () => {
   useEffect(() => {
     store.dispatch(loadUser());
   }, [])
-  window.addEventListener("contextmenu", (e) => e.preventDefault())
+  // window.addEventListener("contextmenu", (e) => e.preventDefault())
   return (
     <>
       {
@@ -52,7 +52,8 @@ const App = () => {
           <Route path='/' element={<Home />} />
           <Route path='/register' element={<Register />} />
           <Route path='/login' element={<Login />} />
-          <Route path='/jobs' element={<JobPage />} />
+          <Route path={`/jobs/:keyword`} element={<JobPage />} />
+          <Route path={`/jobs`} element={<JobPage />} />
           <Route path='/job/detail/:id' element={<JobDetailPage />} />
 
           <Route path='/profile/update' element={!isAuthenticated
