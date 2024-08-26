@@ -1,6 +1,6 @@
 import { createStore, combineReducers, applyMiddleware } from 'redux'
 import { thunk } from 'redux-thunk'
-import { composeWithDevTools } from 'redux-devtools-extension'
+import { composeWithDevTools } from '@redux-devtools/extension'
 import { applyJobReducer, profileReducer, userReducer } from './redux/reducers/userReducer';
 import { jobReducer, getAllJobs, updateJobDetaailsReducer, sessionReducer } from './redux/reducers/jobReducer';
 import { companyReducer, getAllCompany, singalCompanyReducer, updateCompanyReducer } from './redux/reducers/companyReducer';
