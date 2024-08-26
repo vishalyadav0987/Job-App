@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express()
+const path = require('path')
 const connectDB = require('./connectDB/connect');
 require('dotenv').config();
 const PORT = process.env.PORT || 5000;
@@ -31,6 +32,13 @@ app.use("/api/v1/application", applicationRoutes);
 app.get('/test', (req, res) => {
     res.send("This test route for testing purpose.");
 });
+if (process.env.NODE_ENV === "production") {
+    const frontendPath = path.join(__dirname, "..", "frontend", "dist");
+    app.use(express.static(frontendPath));
+    app.get("*", (req, res) => {
+        res.sendFile(path.resolve(frontendPath, "index.html"))
+    })
+}
 
 
 
