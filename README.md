@@ -66,7 +66,6 @@ Job App is a MERN stack application that allows users to search for jobs, apply 
 - MONGO_URI=your_mongodb_connection_string
 - JWT_SECRET=your_jwt_secret
 - JWT_COOKIE_EXPIRE=JWT_COOKIE_EXPIRE
-- FRONTEND_URL=https://job-app-e7r7.onrender.com
 - CLOUDINARY_NAME
 - CLOUDINARY_API_KEY
 - CLOUDINARY_API_SECRET
